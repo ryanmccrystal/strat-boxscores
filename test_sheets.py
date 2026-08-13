@@ -20,11 +20,26 @@ client = gspread.authorize(credentials)
 
 spreadsheet = client.open_by_key(SPREADSHEET_ID)
 
+# Read Standings
 standings = spreadsheet.worksheet("Standings")
+standings_rows = standings.get_all_values()
 
-rows = standings.get_all_values()
+print(f"Found {len(standings_rows)} rows in Standings.")
 
-print(f"Found {len(rows)} rows in Standings.")
+print("\nFirst 5 games:")
+for row in standings_rows[1:6]:
+    print(row[10:18])
 
-for row in rows[:10]:
+
+# Read Batting
+batting = spreadsheet.worksheet("Batting")
+batting_rows = batting.get_all_values()
+
+print(f"\nFound {len(batting_rows)} rows in Batting.")
+
+print("\nBatting headers:")
+print(batting_rows[0])
+
+print("\nFirst 10 batting rows:")
+for row in batting_rows[1:11]:
     print(row)
