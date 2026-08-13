@@ -178,54 +178,54 @@ def print_game(game, batting_rows):
 
     teams = []
 
-            # Team totals
-            total_ab = 0
-            total_r = 0
-            total_h = 0
-            total_rbi = 0
-            total_bb = 0
-            total_k = 0
-    
-            for player in batting_rows:
-    
-                if player["team_code"] != team_code:
-                    continue
-    
-                batter_display = player["batter"]
-    
-                if player["position"]:
-                    batter_display += f" {player['position']}"
-    
-                print(
-                    f"{player['opponent_display']:<12}"
-                    f"{batter_display:<22}"
-                    f"{player['AB']:>4}"
-                    f"{player['R']:>4}"
-                    f"{player['H']:>4}"
-                    f"{player['RBI']:>5}"
-                    f"{player['BB']:>4}"
-                    f"{player['K']:>4}"
-                )
-    
-                # Add this player's statistics to the team totals
-                total_ab += int(player["AB"] or 0)
-                total_r += int(player["R"] or 0)
-                total_h += int(player["H"] or 0)
-                total_rbi += int(player["RBI"] or 0)
-                total_bb += int(player["BB"] or 0)
-                total_k += int(player["K"] or 0)
-    
-            print("-" * 65)
-    
+        # Team totals
+        total_ab = 0
+        total_r = 0
+        total_h = 0
+        total_rbi = 0
+        total_bb = 0
+        total_k = 0
+
+        for player in batting_rows:
+
+            if player["team_code"] != team_code:
+                continue
+
+            batter_display = player["batter"]
+
+            if player["position"]:
+                batter_display += f" {player['position']}"
+
             print(
-                f"{'Totals':<34}"
-                f"{total_ab:>4}"
-                f"{total_r:>4}"
-                f"{total_h:>4}"
-                f"{total_rbi:>5}"
-                f"{total_bb:>4}"
-                f"{total_k:>4}"
+                f"{player['opponent_display']:<12}"
+                f"{batter_display:<22}"
+                f"{player['AB']:>4}"
+                f"{player['R']:>4}"
+                f"{player['H']:>4}"
+                f"{player['RBI']:>5}"
+                f"{player['BB']:>4}"
+                f"{player['K']:>4}"
             )
+
+            # Add this player's statistics to the team totals
+            total_ab += int(player["AB"] or 0)
+            total_r += int(player["R"] or 0)
+            total_h += int(player["H"] or 0)
+            total_rbi += int(player["RBI"] or 0)
+            total_bb += int(player["BB"] or 0)
+            total_k += int(player["K"] or 0)
+
+        print("-" * 65)
+
+        print(
+            f"{'Totals':<34}"
+            f"{total_ab:>4}"
+            f"{total_r:>4}"
+            f"{total_h:>4}"
+            f"{total_rbi:>5}"
+            f"{total_bb:>4}"
+            f"{total_k:>4}"
+        )
 
         print("-" * 65)
 
