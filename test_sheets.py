@@ -43,3 +43,16 @@ print(batting_rows[0])
 print("\nFirst 10 batting rows:")
 for row in batting_rows[1:11]:
     print(row)
+
+# Read Pitching
+pitching = spreadsheet.worksheet("Pitching")
+pitching_rows = pitching.get_all_values()
+
+print(f"\nFound {len(pitching_rows)} rows in Pitching.")
+
+print("\nPitching headers:")
+print(pitching_rows[0])
+
+print("\nFirst 10 pitching rows:")
+for row in pitching_rows[1:11]:
+    print(row)
