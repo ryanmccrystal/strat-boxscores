@@ -22,7 +22,7 @@ jobs:
       - name: Generate box scores
         env:
           GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
-        run: python test_sheets.py
+        run: python boxscores.py
 
       - name: Save generated box scores
         uses: actions/upload-artifact@v4
