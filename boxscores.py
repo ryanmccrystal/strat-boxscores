@@ -390,25 +390,36 @@ def pitcher_display_name(pitcher, decision, records):
 
     name = html_escape(pitcher["pitcher"])
 
+    # Make sure this pitcher has a season record
+    # before we try to display it.
+    if pitcher["pitcher"] not in records:
+        records[pitcher["pitcher"]] = {
+            "W": 0,
+            "L": 0,
+            "H": 0,
+            "S": 0,
+            "BS": 0,
+        }
+
     if not decision:
         return name
 
     record = records[pitcher["pitcher"]]
 
     if decision == "W":
-        return f"{name} W, {record['W']}-{record['L']}"
+        return f"{name} W, {record['W'] + 1}-{record['L']}"
 
     if decision == "L":
-        return f"{name} L, {record['W']}-{record['L']}"
+        return f"{name} L, {record['W']}-{record['L'] + 1}"
 
     if decision == "H":
-        return f"{name} H, {record['H']}"
+        return f"{name} H, {record['H'] + 1}"
 
     if decision == "S":
-        return f"{name} S, {record['S']}"
+        return f"{name} S, {record['S'] + 1}"
 
     if decision == "BS":
-        return f"{name} BS, {record['BS']}"
+        return f"{name} BS, {record['BS'] + 1}"
 
     return name
 
