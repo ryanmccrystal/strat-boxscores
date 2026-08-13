@@ -59,7 +59,7 @@ def get_games(standings):
         if not game_id.startswith("Gm"):
             continue
 
-        game = {
+        games.append({
             "game_id": game_id,
             "date": row[11].strip(),
             "winner": row[12].strip(),
@@ -67,9 +67,7 @@ def get_games(standings):
             "loser": row[14].strip(),
             "loser_runs": row[15].strip(),
             "note": row[16].strip(),
-        }
-
-        games.append(game)
+        })
 
     games.sort(key=lambda x: game_number(x["game_id"]))
 
@@ -114,7 +112,6 @@ def get_batting_data(batting, player_positions):
         if not game_id:
             continue
 
-        # Ignore players with 0 PA
         if pa == "0":
             continue
 
@@ -146,6 +143,75 @@ def get_batting_data(batting, player_positions):
     return batting_by_game
 
 
+def get_pitching_data(pitching):
+    """
+    Read the Pitching tab.
+
+    Columns:
+    A = Pitcher
+    B = Team
+    C = Opponent
+    D = SP?
+    E = IP
+    F = BF
+    G = H
+    H = R
+    I = ER
+    J = BB
+    K = K
+    L = W
+    M = L
+    N = H
+    O = S
+    P = BS
+    """
+
+    rows = pitching.get_all_values()
+
+    pitching_by_game = {}
+
+    for row in rows[1:]:
+
+        if len(row) < 16:
+            continue
+
+        pitcher = row[0].strip()
+        team_code = row[1].strip()
+        opponent_code = row[2].strip()
+        game_id = row[30].strip() if len(row) > 30 else ""
+
+        if not pitcher or not game_id:
+            continue
+
+        pitcher_data = {
+            "pitcher": pitcher,
+            "team_code": team_code,
+            "team": TEAM_NAMES.get(team_code, team_code),
+            "opponent_code": opponent_code,
+            "opponent": TEAM_NAMES.get(
+                opponent_code,
+                opponent_code
+            ),
+            "IP": row[4].strip(),
+            "R": row[7].strip(),
+            "ER": row[8].strip(),
+            "BB": row[9].strip(),
+            "K": row[10].strip(),
+            "W": row[11].strip(),
+            "L": row[12].strip(),
+            "HLD": row[13].strip(),
+            "SV": row[14].strip(),
+            "BS": row[15].strip(),
+        }
+
+        if game_id not in pitching_by_game:
+            pitching_by_game[game_id] = []
+
+        pitching_by_game[game_id].append(pitcher_data)
+
+    return pitching_by_game
+
+
 def make_totals(players):
 
     total_ab = 0
@@ -175,7 +241,6 @@ def make_totals(players):
 
 
 def html_escape(value):
-    """Safely escape text before putting it into HTML."""
     value = str(value)
 
     return (
@@ -264,15 +329,171 @@ def make_team_section(team_code, players):
     return html
 
 
-def make_game_section(game, batting_rows):
+def get_pitcher_decision(pitcher):
+    """
+    Determine the current game's decision.
 
-    # Find teams in the order they appear in the batting data.
+    Priority:
+    W, L, HLD, SV, BS
+    """
+
+    if pitcher["W"]:
+        return "W"
+
+    if pitcher["L"]:
+        return "L"
+
+    if pitcher["HLD"]:
+        return "H"
+
+    if pitcher["SV"]:
+        return "S"
+
+    if pitcher["BS"]:
+        return "BS"
+
+    return ""
+
+
+def update_pitcher_record(records, pitcher, decision):
+    """
+    Update the season-to-date record for a pitcher.
+    """
+
+    if pitcher not in records:
+
+        records[pitcher] = {
+            "W": 0,
+            "L": 0,
+            "H": 0,
+            "S": 0,
+            "BS": 0,
+        }
+
+    if decision == "W":
+        records[pitcher]["W"] += 1
+
+    elif decision == "L":
+        records[pitcher]["L"] += 1
+
+    elif decision == "H":
+        records[pitcher]["H"] += 1
+
+    elif decision == "S":
+        records[pitcher]["S"] += 1
+
+    elif decision == "BS":
+        records[pitcher]["BS"] += 1
+
+
+def pitcher_display_name(pitcher, decision, records):
+
+    name = html_escape(pitcher["pitcher"])
+
+    if not decision:
+        return name
+
+    record = records[pitcher["pitcher"]]
+
+    if decision == "W":
+        return f"{name} W, {record['W']}-{record['L']}"
+
+    if decision == "L":
+        return f"{name} L, {record['W']}-{record['L']}"
+
+    if decision == "H":
+        return f"{name} H, {record['H']}"
+
+    if decision == "S":
+        return f"{name} S, {record['S']}"
+
+    if decision == "BS":
+        return f"{name} BS, {record['BS']}"
+
+    return name
+
+
+def make_pitching_section(team_code, pitchers, records):
+
+    team_name = TEAM_NAMES.get(team_code, team_code)
+
+    team_pitchers = [
+        pitcher
+        for pitcher in pitchers
+        if pitcher["team_code"] == team_code
+    ]
+
+    html = f"""
+    <section class="pitching-section">
+
+        <h3>{html_escape(team_name)} Pitching</h3>
+
+        <table class="pitching-table">
+
+            <thead>
+                <tr>
+                    <th class="pitcher-column"></th>
+                    <th>IP</th>
+                    <th>R</th>
+                    <th>ER</th>
+                    <th>BB</th>
+                    <th>K</th>
+                </tr>
+            </thead>
+
+            <tbody>
+    """
+
+    for pitcher in team_pitchers:
+
+        decision = get_pitcher_decision(pitcher)
+
+        display_name = pitcher_display_name(
+            pitcher,
+            decision,
+            records
+        )
+
+        html += f"""
+                <tr>
+                    <td class="pitcher-name">{display_name}</td>
+                    <td>{html_escape(pitcher["IP"])}</td>
+                    <td>{html_escape(pitcher["R"])}</td>
+                    <td>{html_escape(pitcher["ER"])}</td>
+                    <td>{html_escape(pitcher["BB"])}</td>
+                    <td>{html_escape(pitcher["K"])}</td>
+                </tr>
+        """
+
+    html += """
+            </tbody>
+
+        </table>
+
+    </section>
+    """
+
+    return html
+
+
+def make_game_section(
+    game,
+    batting_rows,
+    pitching_rows,
+    records
+):
+
     teams = []
 
     for player in batting_rows:
 
         if player["team_code"] not in teams:
             teams.append(player["team_code"])
+
+    for pitcher in pitching_rows:
+
+        if pitcher["team_code"] not in teams:
+            teams.append(pitcher["team_code"])
 
     winner = html_escape(game["winner"])
     loser = html_escape(game["loser"])
@@ -284,16 +505,20 @@ def make_game_section(game, batting_rows):
     <article class="game">
 
         <div class="game-header">
+
             <div class="score">
                 <strong>{winner} {winner_runs}, {loser} {loser_runs}</strong>
             </div>
 
             <div class="game-info">
-                {html_escape(game["game_id"])} &nbsp; | &nbsp; {html_escape(game["date"])}
+                {html_escape(game["game_id"])}
+                &nbsp; | &nbsp;
+                {html_escape(game["date"])}
             </div>
     """
 
     if game["note"]:
+
         html += f"""
             <div class="game-note">
                 {html_escape(game["note"])}
@@ -305,9 +530,19 @@ def make_game_section(game, batting_rows):
     """
 
     for team_code in teams:
+
         html += make_team_section(
             team_code,
             batting_rows
+        )
+
+    # Add pitching sections
+    for team_code in teams:
+
+        html += make_pitching_section(
+            team_code,
+            pitching_rows,
+            records
         )
 
     html += """
@@ -317,7 +552,11 @@ def make_game_section(game, batting_rows):
     return html
 
 
-def create_html(games, batting_by_game):
+def create_html(
+    games,
+    batting_by_game,
+    pitching_by_game
+):
 
     html = """<!DOCTYPE html>
 <html lang="en">
@@ -385,29 +624,34 @@ def create_html(games, batting_by_game):
         margin: 0 0 5px 0;
     }
 
-    .batting-table {
+    .batting-table,
+    .pitching-table {
         width: 100%;
         border-collapse: collapse;
         font-size: 14px;
     }
 
-    .batting-table th {
+    .batting-table th,
+    .pitching-table th {
         font-weight: normal;
         border-bottom: 1px solid #222;
         padding: 3px 5px;
         text-align: right;
     }
 
-    .batting-table th.player-column {
+    .batting-table th.player-column,
+    .pitching-table th.pitcher-column {
         text-align: left;
     }
 
-    .batting-table td {
+    .batting-table td,
+    .pitching-table td {
         padding: 3px 5px;
         text-align: right;
     }
 
-    .batting-table td.player-name {
+    .batting-table td.player-name,
+    .pitching-table td.pitcher-name {
         text-align: left;
         white-space: nowrap;
     }
@@ -417,18 +661,30 @@ def create_html(games, batting_by_game):
         font-weight: bold;
     }
 
+    .pitching-section {
+        margin-top: 18px;
+    }
+
+    .pitching-section h3 {
+        font-size: 17px;
+        margin: 0 0 5px 0;
+    }
+
     @media (max-width: 600px) {
 
         body {
             padding: 15px;
         }
 
-        .batting-table {
+        .batting-table,
+        .pitching-table {
             font-size: 13px;
         }
 
         .batting-table th,
-        .batting-table td {
+        .batting-table td,
+        .pitching-table th,
+        .pitching-table td {
             padding: 3px;
         }
     }
@@ -444,6 +700,9 @@ def create_html(games, batting_by_game):
 <h1>Strat-o-Matic Box Scores</h1>
 """
 
+    # This tracks the season-to-date records.
+    records = {}
+
     for game in games:
 
         game_id = game["game_id"]
@@ -453,10 +712,30 @@ def create_html(games, batting_by_game):
             []
         )
 
+        pitching_rows = pitching_by_game.get(
+            game_id,
+            []
+        )
+
         html += make_game_section(
             game,
-            batting_rows
+            batting_rows,
+            pitching_rows,
+            records
         )
+
+        # Update pitcher records AFTER generating the current game.
+        for pitcher in pitching_rows:
+
+            decision = get_pitcher_decision(pitcher)
+
+            if decision:
+
+                update_pitcher_record(
+                    records,
+                    pitcher["pitcher"],
+                    decision
+                )
 
     html += """
 </div>
@@ -476,6 +755,7 @@ def main():
     standings = spreadsheet.worksheet("Standings")
     batting = spreadsheet.worksheet("Batting")
     batting_stats = spreadsheet.worksheet("Batting Stats")
+    pitching = spreadsheet.worksheet("Pitching")
 
     games = get_games(standings)
 
@@ -488,9 +768,14 @@ def main():
         player_positions
     )
 
+    pitching_by_game = get_pitching_data(
+        pitching
+    )
+
     html = create_html(
         games,
-        batting_by_game
+        batting_by_game,
+        pitching_by_game
     )
 
     with open(
