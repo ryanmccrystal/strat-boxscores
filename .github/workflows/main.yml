@@ -1,10 +1,10 @@
-name: Test Google Sheets Connection
+name: Generate Strat Box Scores
 
 on:
   workflow_dispatch:
 
 jobs:
-  test:
+  generate:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,3 +23,9 @@ jobs:
         env:
           GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
         run: python boxscores.py
+
+      - name: Save generated box scores
+        uses: actions/upload-artifact@v4
+        with:
+          name: boxscores
+          path: boxscores.html
