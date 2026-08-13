@@ -36,10 +36,6 @@ def get_google_sheet():
 
 
 def game_number(game_id):
-    """
-    Convert Gm1, Gm2, Gm10, etc. into a number
-    so games sort numerically rather than alphabetically.
-    """
     match = re.search(r"\d+", game_id)
 
     if match:
@@ -49,23 +45,17 @@ def game_number(game_id):
 
 
 def get_games(standings):
-    """
-    Read the Standings tab and return game information.
-    """
-
     rows = standings.get_all_values()
 
     games = []
 
     for row in rows[1:]:
 
-        # Make sure the row is long enough
         if len(row) < 17:
             continue
 
         game_id = row[10].strip()
 
-        # Ignore rows without a game ID
         if not game_id.startswith("Gm"):
             continue
 
@@ -86,7 +76,32 @@ def get_games(standings):
     return games
 
 
-def get_batting_data(batting):
+def get_player_positions(batting_stats):
+    """
+    Read Batting Stats and create a player-name -> position lookup.
+    Column B = player name
+    Column C = position
+    """
+
+    rows = batting_stats.get_all_values()
+
+    positions = {}
+
+    for row in rows[1:]:
+
+        if len(row) < 3:
+            continue
+
+        player_name = row[1].strip()
+        position = row[2].strip()
+
+        if player_name:
+            positions[player_name] = position
+
+    return positions
+
+
+def get_batting_data(batting, player_positions):
     """
     Read all batting rows and organize them by game.
     """
@@ -114,6 +129,8 @@ def get_batting_data(batting):
         if pa == "0":
             continue
 
+        position = player_positions.get(batter, "")
+
         player = {
             "team_code": team_code,
             "team": TEAM_NAMES.get(team_code, team_code),
@@ -123,6 +140,7 @@ def get_batting_data(batting):
                 opponent_code
             ),
             "batter": batter,
+            "position": position,
             "opponent_display": opponent_code,
             "AB": row[5].strip(),
             "R": row[6].strip(),
@@ -141,9 +159,6 @@ def get_batting_data(batting):
 
 
 def print_game(game, batting_rows):
-    """
-    Print one game's box score.
-    """
 
     print()
     print("=" * 70)
@@ -161,7 +176,6 @@ def print_game(game, batting_rows):
 
     print("=" * 70)
 
-    # Determine the order of the teams based on the batting data.
     teams = []
 
     for player in batting_rows:
@@ -194,9 +208,14 @@ def print_game(game, batting_rows):
             if player["team_code"] != team_code:
                 continue
 
+            batter_display = player["batter"]
+
+            if player["position"]:
+                batter_display += f" {player['position']}"
+
             print(
                 f"{player['opponent_display']:<12}"
-                f"{player['batter']:<22}"
+                f"{batter_display:<22}"
                 f"{player['AB']:>4}"
                 f"{player['R']:>4}"
                 f"{player['H']:>4}"
@@ -212,9 +231,16 @@ def main():
 
     standings = spreadsheet.worksheet("Standings")
     batting = spreadsheet.worksheet("Batting")
+    batting_stats = spreadsheet.worksheet("Batting Stats")
 
     games = get_games(standings)
-    batting_by_game = get_batting_data(batting)
+
+    player_positions = get_player_positions(batting_stats)
+
+    batting_by_game = get_batting_data(
+        batting,
+        player_positions
+    )
 
     print(f"Found {len(games)} games.")
 
@@ -222,9 +248,15 @@ def main():
 
         game_id = game["game_id"]
 
-        batting_rows = batting_by_game.get(game_id, [])
+        batting_rows = batting_by_game.get(
+            game_id,
+            []
+        )
 
-        print_game(game, batting_rows)
+        print_game(
+            game,
+            batting_rows
+        )
 
 
 if __name__ == "__main__":
