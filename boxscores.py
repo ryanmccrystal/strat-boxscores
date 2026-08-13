@@ -178,6 +178,31 @@ def print_game(game, batting_rows):
 
     teams = []
 
+    for player in batting_rows:
+        if player["team_code"] not in teams:
+            teams.append(player["team_code"])
+
+    for team_code in teams:
+
+        team_name = TEAM_NAMES.get(team_code, team_code)
+
+        print()
+        print(team_name)
+        print()
+
+        print(
+            f"{'Opponent':<12}"
+            f"{'Batter':<22}"
+            f"{'AB':>4}"
+            f"{'R':>4}"
+            f"{'H':>4}"
+            f"{'RBI':>5}"
+            f"{'BB':>4}"
+            f"{'K':>4}"
+        )
+
+        print("-" * 65)
+
         # Team totals
         total_ab = 0
         total_r = 0
@@ -226,29 +251,6 @@ def print_game(game, batting_rows):
             f"{total_bb:>4}"
             f"{total_k:>4}"
         )
-
-        print("-" * 65)
-
-        for player in batting_rows:
-
-            if player["team_code"] != team_code:
-                continue
-
-            batter_display = player["batter"]
-
-            if player["position"]:
-                batter_display += f" {player['position']}"
-
-            print(
-                f"{player['opponent_display']:<12}"
-                f"{batter_display:<22}"
-                f"{player['AB']:>4}"
-                f"{player['R']:>4}"
-                f"{player['H']:>4}"
-                f"{player['RBI']:>5}"
-                f"{player['BB']:>4}"
-                f"{player['K']:>4}"
-            )
 
 
 def main():
