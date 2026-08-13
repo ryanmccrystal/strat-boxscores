@@ -77,12 +77,6 @@ def get_games(standings):
 
 
 def get_player_positions(batting_stats):
-    """
-    Read Batting Stats and create a player-name -> position lookup.
-    Column B = player name
-    Column C = position
-    """
-
     rows = batting_stats.get_all_values()
 
     positions = {}
@@ -102,10 +96,6 @@ def get_player_positions(batting_stats):
 
 
 def get_batting_data(batting, player_positions):
-    """
-    Read all batting rows and organize them by game.
-    """
-
     rows = batting.get_all_values()
 
     batting_by_game = {}
@@ -121,7 +111,6 @@ def get_batting_data(batting, player_positions):
         pa = row[4].strip()
         game_id = row[27].strip()
 
-        # Ignore rows without a game ID
         if not game_id:
             continue
 
@@ -141,7 +130,6 @@ def get_batting_data(batting, player_positions):
             ),
             "batter": batter,
             "position": position,
-            "opponent_display": opponent_code,
             "AB": row[5].strip(),
             "R": row[6].strip(),
             "H": row[7].strip(),
@@ -158,99 +146,327 @@ def get_batting_data(batting, player_positions):
     return batting_by_game
 
 
-def print_game(game, batting_rows):
+def make_totals(players):
 
-    print()
-    print("=" * 70)
+    total_ab = 0
+    total_r = 0
+    total_h = 0
+    total_rbi = 0
+    total_bb = 0
+    total_k = 0
 
-    title = (
-        f"{game['game_id']} — {game['date']} | "
-        f"{game['winner']} {game['winner_runs']}, "
-        f"{game['loser']} {game['loser_runs']}"
+    for player in players:
+
+        total_ab += int(player["AB"] or 0)
+        total_r += int(player["R"] or 0)
+        total_h += int(player["H"] or 0)
+        total_rbi += int(player["RBI"] or 0)
+        total_bb += int(player["BB"] or 0)
+        total_k += int(player["K"] or 0)
+
+    return {
+        "AB": total_ab,
+        "R": total_r,
+        "H": total_h,
+        "RBI": total_rbi,
+        "BB": total_bb,
+        "K": total_k,
+    }
+
+
+def html_escape(value):
+    """Safely escape text before putting it into HTML."""
+    value = str(value)
+
+    return (
+        value
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
+        .replace("'", "&#39;")
     )
 
-    print(title)
 
-    if game["note"]:
-        print(game["note"])
+def make_team_section(team_code, players):
 
-    print("=" * 70)
+    team_name = TEAM_NAMES.get(team_code, team_code)
 
+    team_players = [
+        player
+        for player in players
+        if player["team_code"] == team_code
+    ]
+
+    totals = make_totals(team_players)
+
+    html = f"""
+    <section class="team-section">
+
+        <h2>{html_escape(team_name)}</h2>
+
+        <table class="batting-table">
+
+            <thead>
+                <tr>
+                    <th class="player-column"></th>
+                    <th>AB</th>
+                    <th>R</th>
+                    <th>H</th>
+                    <th>BI</th>
+                    <th>BB</th>
+                    <th>K</th>
+                </tr>
+            </thead>
+
+            <tbody>
+    """
+
+    for player in team_players:
+
+        batter_name = html_escape(player["batter"])
+        position = html_escape(player["position"])
+
+        if position:
+            display_name = f"{batter_name} {position}"
+        else:
+            display_name = batter_name
+
+        html += f"""
+                <tr>
+                    <td class="player-name">{display_name}</td>
+                    <td>{html_escape(player["AB"])}</td>
+                    <td>{html_escape(player["R"])}</td>
+                    <td>{html_escape(player["H"])}</td>
+                    <td>{html_escape(player["RBI"])}</td>
+                    <td>{html_escape(player["BB"])}</td>
+                    <td>{html_escape(player["K"])}</td>
+                </tr>
+        """
+
+    html += f"""
+                <tr class="totals">
+                    <td class="player-name">Totals</td>
+                    <td>{totals["AB"]}</td>
+                    <td>{totals["R"]}</td>
+                    <td>{totals["H"]}</td>
+                    <td>{totals["RBI"]}</td>
+                    <td>{totals["BB"]}</td>
+                    <td>{totals["K"]}</td>
+                </tr>
+            </tbody>
+
+        </table>
+
+    </section>
+    """
+
+    return html
+
+
+def make_game_section(game, batting_rows):
+
+    # Find teams in the order they appear in the batting data.
     teams = []
 
     for player in batting_rows:
+
         if player["team_code"] not in teams:
             teams.append(player["team_code"])
 
+    winner = html_escape(game["winner"])
+    loser = html_escape(game["loser"])
+
+    winner_runs = html_escape(game["winner_runs"])
+    loser_runs = html_escape(game["loser_runs"])
+
+    html = f"""
+    <article class="game">
+
+        <div class="game-header">
+            <div class="score">
+                <strong>{winner} {winner_runs}, {loser} {loser_runs}</strong>
+            </div>
+
+            <div class="game-info">
+                {html_escape(game["game_id"])} &nbsp; | &nbsp; {html_escape(game["date"])}
+            </div>
+    """
+
+    if game["note"]:
+        html += f"""
+            <div class="game-note">
+                {html_escape(game["note"])}
+            </div>
+        """
+
+    html += """
+        </div>
+    """
+
     for team_code in teams:
-
-        team_name = TEAM_NAMES.get(team_code, team_code)
-
-        print()
-        print(team_name)
-        print()
-
-        print(
-            f"{'Opponent':<12}"
-            f"{'Batter':<22}"
-            f"{'AB':>4}"
-            f"{'R':>4}"
-            f"{'H':>4}"
-            f"{'RBI':>5}"
-            f"{'BB':>4}"
-            f"{'K':>4}"
+        html += make_team_section(
+            team_code,
+            batting_rows
         )
 
-        print("-" * 65)
+    html += """
+    </article>
+    """
 
-        # Team totals
-        total_ab = 0
-        total_r = 0
-        total_h = 0
-        total_rbi = 0
-        total_bb = 0
-        total_k = 0
+    return html
 
-        for player in batting_rows:
 
-            if player["team_code"] != team_code:
-                continue
+def create_html(games, batting_by_game):
 
-            batter_display = player["batter"]
+    html = """<!DOCTYPE html>
+<html lang="en">
 
-            if player["position"]:
-                batter_display += f" {player['position']}"
+<head>
 
-            print(
-                f"{player['opponent_display']:<12}"
-                f"{batter_display:<22}"
-                f"{player['AB']:>4}"
-                f"{player['R']:>4}"
-                f"{player['H']:>4}"
-                f"{player['RBI']:>5}"
-                f"{player['BB']:>4}"
-                f"{player['K']:>4}"
-            )
+<meta charset="UTF-8">
 
-            # Add this player's statistics to the team totals
-            total_ab += int(player["AB"] or 0)
-            total_r += int(player["R"] or 0)
-            total_h += int(player["H"] or 0)
-            total_rbi += int(player["RBI"] or 0)
-            total_bb += int(player["BB"] or 0)
-            total_k += int(player["K"] or 0)
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        print("-" * 65)
+<title>Strat-o-Matic Box Scores</title>
 
-        print(
-            f"{'Totals':<34}"
-            f"{total_ab:>4}"
-            f"{total_r:>4}"
-            f"{total_h:>4}"
-            f"{total_rbi:>5}"
-            f"{total_bb:>4}"
-            f"{total_k:>4}"
+<style>
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        background: #ffffff;
+        color: #111111;
+        margin: 0;
+        padding: 30px;
+    }
+
+    .container {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    h1 {
+        font-size: 26px;
+        margin-bottom: 30px;
+    }
+
+    .game {
+        margin-bottom: 45px;
+        padding-bottom: 25px;
+        border-bottom: 2px solid #222;
+    }
+
+    .game-header {
+        margin-bottom: 15px;
+    }
+
+    .score {
+        font-size: 20px;
+        margin-bottom: 4px;
+    }
+
+    .game-info {
+        font-size: 13px;
+        color: #666;
+    }
+
+    .game-note {
+        font-size: 13px;
+        font-weight: bold;
+        margin-top: 4px;
+    }
+
+    .team-section {
+        margin-top: 18px;
+    }
+
+    .team-section h2 {
+        font-size: 17px;
+        margin: 0 0 5px 0;
+    }
+
+    .batting-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+
+    .batting-table th {
+        font-weight: normal;
+        border-bottom: 1px solid #222;
+        padding: 3px 5px;
+        text-align: right;
+    }
+
+    .batting-table th.player-column {
+        text-align: left;
+    }
+
+    .batting-table td {
+        padding: 3px 5px;
+        text-align: right;
+    }
+
+    .batting-table td.player-name {
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .batting-table tr.totals {
+        border-top: 1px solid #222;
+        font-weight: bold;
+    }
+
+    @media (max-width: 600px) {
+
+        body {
+            padding: 15px;
+        }
+
+        .batting-table {
+            font-size: 13px;
+        }
+
+        .batting-table th,
+        .batting-table td {
+            padding: 3px;
+        }
+    }
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Strat-o-Matic Box Scores</h1>
+"""
+
+    for game in games:
+
+        game_id = game["game_id"]
+
+        batting_rows = batting_by_game.get(
+            game_id,
+            []
         )
+
+        html += make_game_section(
+            game,
+            batting_rows
+        )
+
+    html += """
+</div>
+
+</body>
+
+</html>
+"""
+
+    return html
 
 
 def main():
@@ -263,28 +479,31 @@ def main():
 
     games = get_games(standings)
 
-    player_positions = get_player_positions(batting_stats)
+    player_positions = get_player_positions(
+        batting_stats
+    )
 
     batting_by_game = get_batting_data(
         batting,
         player_positions
     )
 
-    print(f"Found {len(games)} games.")
+    html = create_html(
+        games,
+        batting_by_game
+    )
 
-    for game in games:
+    with open(
+        "boxscores.html",
+        "w",
+        encoding="utf-8"
+    ) as file:
 
-        game_id = game["game_id"]
+        file.write(html)
 
-        batting_rows = batting_by_game.get(
-            game_id,
-            []
-        )
-
-        print_game(
-            game,
-            batting_rows
-        )
+    print(
+        f"Created boxscores.html with {len(games)} games."
+    )
 
 
 if __name__ == "__main__":
