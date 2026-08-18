@@ -783,8 +783,14 @@ def create_html(
     }
 
     .container {
-        max-width: 700px;
+        max-width: 1800px;
         margin: 0 auto;
+    }
+    
+    .games-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 20px;
     }
 
     h1 {
