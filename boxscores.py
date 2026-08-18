@@ -791,68 +791,92 @@ def create_html(
         margin: 0 auto;
     }
 
+    /* =========================
+       PAGE TITLE
+       ========================= */
+
     h1 {
-        font-size: 24px;
-        margin: 0 0 20px 0;
+        font-size: 26px;
+        font-weight: 700;
+        margin: 0 0 22px 0;
     }
+
+    /* =========================
+       GAME GRID
+       ========================= */
 
     .games-grid {
         display: grid;
         grid-template-columns: repeat(5, minmax(0, 1fr));
-        gap: 16px;
+        gap: 18px;
         align-items: start;
     }
 
+    /* =========================
+       INDIVIDUAL GAME
+       ========================= */
+
     .game {
         margin: 0;
-        padding: 10px;
+        padding: 12px;
         border: 1px solid #222;
-        font-size: 10px;
+        font-size: 12px;
         min-width: 0;
     }
 
+    /* =========================
+       GAME HEADER
+       ========================= */
+
     .game-header {
-        margin-bottom: 10px;
+        margin-bottom: 12px;
     }
 
     .score {
-        font-size: 14px;
+        font-size: 17px;
+        font-weight: 700;
         margin-bottom: 2px;
         line-height: 1.2;
     }
 
     .game-info {
-        font-size: 9px;
+        font-size: 11px;
         color: #666;
         line-height: 1.2;
     }
 
     .game-note {
-        font-size: 9px;
-        font-weight: bold;
-        margin-top: 2px;
+        font-size: 11px;
+        font-weight: 700;
+        margin-top: 3px;
     }
 
+    /* =========================
+       BATTING
+       ========================= */
+
     .team-section {
-        margin-top: 10px;
+        margin-top: 12px;
     }
 
     .team-section h2 {
-        font-size: 12px;
-        margin: 0 0 3px 0;
+        font-size: 15px;
+        font-weight: 700;
+        margin: 0 0 4px 0;
     }
 
     .batting-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 9px;
+        font-size: 12px;
     }
 
     .batting-table th {
-        font-weight: normal;
+        font-weight: 600;
         border-bottom: 1px solid #222;
-        padding: 2px 2px;
+        padding: 3px 2px;
         text-align: right;
+        line-height: 1.1;
     }
 
     .batting-table th.player-column {
@@ -860,7 +884,7 @@ def create_html(
     }
 
     .batting-table td {
-        padding: 2px 2px;
+        padding: 3px 2px;
         text-align: right;
         line-height: 1.15;
     }
@@ -872,36 +896,46 @@ def create_html(
 
     .batting-table tr.totals {
         border-top: 1px solid #222;
-        font-weight: bold;
+        font-weight: 700;
     }
+
+    /* =========================
+       NOTES
+       ========================= */
 
     .notes {
-        margin-top: 10px;
-        margin-bottom: 10px;
-        font-size: 9px;
-        line-height: 1.35;
+        margin-top: 12px;
+        margin-bottom: 12px;
+        font-size: 11px;
+        line-height: 1.4;
     }
 
+    /* =========================
+       PITCHING
+       ========================= */
+
     .pitching-section {
-        margin-top: 10px;
+        margin-top: 12px;
     }
 
     .pitching-section h3 {
-        font-size: 12px;
-        margin: 0 0 3px 0;
+        font-size: 15px;
+        font-weight: 700;
+        margin: 0 0 4px 0;
     }
 
     .pitching-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 9px;
+        font-size: 12px;
     }
 
     .pitching-table th {
-        font-weight: normal;
+        font-weight: 600;
         border-bottom: 1px solid #222;
-        padding: 2px 2px;
+        padding: 3px 2px;
         text-align: right;
+        line-height: 1.1;
     }
 
     .pitching-table th.pitcher-column {
@@ -909,7 +943,7 @@ def create_html(
     }
 
     .pitching-table td {
-        padding: 2px 2px;
+        padding: 3px 2px;
         text-align: right;
         line-height: 1.15;
     }
@@ -919,7 +953,11 @@ def create_html(
         white-space: nowrap;
     }
 
-    @media (max-width: 1400px) {
+    /* =========================
+       RESPONSIVE LAYOUT
+       ========================= */
+
+    @media (max-width: 1500px) {
 
         .games-grid {
             grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -927,7 +965,7 @@ def create_html(
 
     }
 
-    @media (max-width: 1150px) {
+    @media (max-width: 1200px) {
 
         .games-grid {
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -935,10 +973,10 @@ def create_html(
 
     }
 
-    @media (max-width: 850px) {
+    @media (max-width: 900px) {
 
         body {
-            padding: 12px;
+            padding: 15px;
         }
 
         .games-grid {
@@ -958,37 +996,36 @@ def create_html(
         }
 
         .game {
-            padding: 12px;
-            font-size: 12px;
+            padding: 14px;
         }
 
         .score {
-            font-size: 17px;
+            font-size: 19px;
         }
 
         .game-info {
-            font-size: 11px;
+            font-size: 12px;
         }
 
         .team-section h2,
         .pitching-section h3 {
-            font-size: 14px;
+            font-size: 16px;
         }
 
         .batting-table,
         .pitching-table {
-            font-size: 12px;
+            font-size: 13px;
         }
 
         .batting-table th,
         .batting-table td,
         .pitching-table th,
         .pitching-table td {
-            padding: 3px;
+            padding: 4px;
         }
 
         .notes {
-            font-size: 11px;
+            font-size: 12px;
         }
 
     }
