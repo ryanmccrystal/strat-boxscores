@@ -1472,7 +1472,8 @@ def main():
         games,
         batting_by_game,
         pitching_by_game,
-        home_away_order
+        home_away_order,
+        linescore_by_game
     )
 
     with open(
