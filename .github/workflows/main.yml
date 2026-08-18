@@ -3,6 +3,11 @@ name: Generate Strat Box Scores
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   generate:
     runs-on: ubuntu-latest
@@ -24,8 +29,14 @@ jobs:
           GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
         run: python boxscores.py
 
-      - name: Save generated box scores
-        uses: actions/upload-artifact@v4
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: boxscores
-          path: boxscores.html
+          path: .
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
