@@ -1243,6 +1243,8 @@ def create_html(
         table-layout: fixed;
         border-collapse: collapse;
         font-size: 13px;
+        border-top: 1px solid #222;
+        border-bottom: 1px solid #222;
     }
     
     .linescore-table td {
