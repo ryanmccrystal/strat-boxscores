@@ -279,13 +279,11 @@ def make_team_section(team_code, players):
     html = f"""
     <section class="team-section">
 
-        <h2>{html_escape(team_name)}</h2>
-
         <table class="batting-table">
 
             <thead>
                 <tr>
-                    <th class="player-column"></th>
+                    <th class="player-column">{html_escape(team_name)}</th>
                     <th>AB</th>
                     <th>R</th>
                     <th>H</th>
@@ -616,13 +614,11 @@ def make_pitching_section(team_code, pitchers, records):
     html = f"""
     <section class="pitching-section">
 
-        <h3>{html_escape(team_name)} Pitching</h3>
-
-        <table class="pitching-table">
+        <table class="pitching-table">>
 
             <thead>
                 <tr>
-                    <th class="pitcher-column"></th>
+                    <th class="pitcher-column">{html_escape(team_name)}</th>
                     <th>IP</th>
                     <th>R</th>
                     <th>ER</th>
@@ -859,12 +855,6 @@ def create_html(
         margin-top: 12px;
     }
 
-    .team-section h2 {
-        font-size: 15px;
-        font-weight: 700;
-        margin: 0 0 4px 0;
-    }
-
     .batting-table {
         width: 100%;
         border-collapse: collapse;
@@ -1007,9 +997,10 @@ def create_html(
             font-size: 12px;
         }
 
-        .team-section h2,
-        .pitching-section h3 {
-            font-size: 16px;
+        .batting-table th.player-column,
+        .pitching-table th.pitcher-column {
+            text-align: left;
+            font-weight: 700;
         }
 
         .batting-table,
