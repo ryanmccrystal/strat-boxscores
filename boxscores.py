@@ -889,13 +889,13 @@ def create_html(
        ========================= */
 
     .game-header {
-        margin-bottom: 12px;
+        margin-bottom: 9px;
     }
 
     .score {
         font-size: 17px;
         font-weight: 700;
-        margin-bottom: 2px;
+        margin-bottom: 1px;
         line-height: 1.2;
     }
 
@@ -921,7 +921,7 @@ def create_html(
        ========================= */
 
     .team-section {
-        margin-top: 12px;
+        margin-top: 9px;
     }
 
     .batting-table,
@@ -955,15 +955,15 @@ def create_html(
     .pitching-table th {
         font-weight: 600;
         border-bottom: 1px solid #222;
-        padding: 3px 2px;
-        line-height: 1.1;
+        padding: 2px 2px;
+        line-height: 1.05;
     }
     
     /* Player/pitcher rows */
     .batting-table td,
     .pitching-table td {
-        padding: 3px 2px;
-        line-height: 1.15;
+        padding: 2px 2px;
+        line-height: 1.05;
     }
     
     .batting-table td.player-name,
@@ -981,15 +981,19 @@ def create_html(
         font-size: 75%;
     }
 
+    .pitching-section {
+        margin-top: 9px;
+    }
+
     /* =========================
        NOTES
        ========================= */
 
     .notes {
-        margin-top: 12px;
-        margin-bottom: 12px;
+        margin-top: 9px;
+        margin-bottom: 9px;
         font-size: 13px;
-        line-height: 1.35;
+        line-height: 1.25;
     }
 
     /* =========================
