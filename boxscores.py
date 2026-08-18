@@ -698,16 +698,78 @@ def make_pitching_section(team_code, pitchers, records):
 
     return html
 
+def get_home_away_order(linescore):
+    """
+    Read the Linescore tab and determine the away/home
+    team for every game.
+
+    B = GameID
+    D = Team code
+    E = H/A
+    """
+
+    rows = linescore.get_all_values()
+
+    game_order = {}
+
+    for row in rows[1:]:
+
+        if len(row) < 5:
+            continue
+
+        game_id = row[1].strip()
+        team_code = row[3].strip()
+        home_away = row[4].strip().upper()
+
+        if not game_id or not team_code:
+            continue
+
+        if game_id not in game_order:
+            game_order[game_id] = {
+                "away": None,
+                "home": None,
+            }
+
+        if home_away == "A":
+            game_order[game_id]["away"] = team_code
+
+        elif home_away == "H":
+            game_order[game_id]["home"] = team_code
+
+    return game_order
 
 def make_game_section(
     game,
     batting_rows,
     pitching_rows,
-    records
+    records,
+    home_away_order
 ):
 
     teams = []
 
+    game_id = game["game_id"]
+
+    away_team = home_away_order.get(
+        game_id,
+        {}
+    ).get("away")
+
+    home_team = home_away_order.get(
+        game_id,
+        {}
+    ).get("home")
+
+    # Always put Away first, Home second.
+    if away_team:
+        teams.append(away_team)
+
+    if home_team:
+        teams.append(home_team)
+
+    # Fallback in case a team isn't found in Linescore.
+    # This prevents the box score from disappearing if
+    # there is incomplete Linescore data.
     for player in batting_rows:
 
         if player["team_code"] not in teams:
@@ -818,7 +880,8 @@ def make_game_section(
 def create_html(
     games,
     batting_by_game,
-    pitching_by_game
+    pitching_by_game,
+    home_away_order
 ):
 
     html = """<!DOCTYPE html>
@@ -1110,12 +1173,12 @@ def create_html(
             []
         )
 
-        # Generate this game's box score.
         html += make_game_section(
             game,
             batting_rows,
             pitching_rows,
-            records
+            records,
+            home_away_order
         )
 
         # Update pitcher records AFTER generating
@@ -1154,6 +1217,7 @@ def main():
     batting = spreadsheet.worksheet("Batting")
     batting_stats = spreadsheet.worksheet("Batting Stats")
     pitching = spreadsheet.worksheet("Pitching")
+    linescore = spreadsheet.worksheet("Linescore")
 
     games = get_games(standings)
 
@@ -1170,10 +1234,15 @@ def main():
         pitching
     )
 
+    home_away_order = get_home_away_order(
+        linescore
+    )
+
     html = create_html(
         games,
         batting_by_game,
-        pitching_by_game
+        pitching_by_game,
+        home_away_order
     )
 
     with open(
