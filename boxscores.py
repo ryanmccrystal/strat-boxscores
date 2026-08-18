@@ -1191,7 +1191,7 @@ def create_html(
     .game {
         margin: 0;
         padding: 12px;
-        border: 1px solid #222;
+        border: none;
         font-size: 12px;
         min-width: 0;
     }
