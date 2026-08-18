@@ -775,7 +775,7 @@ def create_html(
 <style>
 
     body {
-        font-family: Arial, Helvetica, sans-serif;
+        font-family: "Source Sans 3", Arial, Helvetica, sans-serif;
         background: #ffffff;
         color: #111111;
         margin: 0;
