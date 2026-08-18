@@ -787,18 +787,10 @@ def create_html(
         margin: 0 auto;
     }
 
-    /* =========================
-       PAGE TITLE
-       ========================= */
-
     h1 {
         font-size: 24px;
         margin: 0 0 20px 0;
     }
-
-    /* =========================
-       GAME GRID
-       ========================= */
 
     .games-grid {
         display: grid;
@@ -807,10 +799,6 @@ def create_html(
         align-items: start;
     }
 
-    /* =========================
-       INDIVIDUAL GAME
-       ========================= */
-
     .game {
         margin: 0;
         padding: 10px;
@@ -818,10 +806,6 @@ def create_html(
         font-size: 10px;
         min-width: 0;
     }
-
-    /* =========================
-       GAME HEADER
-       ========================= */
 
     .game-header {
         margin-bottom: 10px;
@@ -844,10 +828,6 @@ def create_html(
         font-weight: bold;
         margin-top: 2px;
     }
-
-    /* =========================
-       BATTING
-       ========================= */
 
     .team-section {
         margin-top: 10px;
@@ -891,20 +871,12 @@ def create_html(
         font-weight: bold;
     }
 
-    /* =========================
-       NOTES
-       ========================= */
-
     .notes {
         margin-top: 10px;
         margin-bottom: 10px;
         font-size: 9px;
         line-height: 1.35;
     }
-
-    /* =========================
-       PITCHING
-       ========================= */
 
     .pitching-section {
         margin-top: 10px;
@@ -943,10 +915,6 @@ def create_html(
         white-space: nowrap;
     }
 
-    /* =========================
-       LARGE / MEDIUM SCREENS
-       ========================= */
-
     @media (max-width: 1400px) {
 
         .games-grid {
@@ -974,10 +942,6 @@ def create_html(
         }
 
     }
-
-    /* =========================
-       PHONES
-       ========================= */
 
     @media (max-width: 600px) {
 
@@ -1034,6 +998,8 @@ def create_html(
 <div class="container">
 
 <h1>Strat-o-Matic Box Scores</h1>
+
+<div class="games-grid">
 """
 
     # Calculate season-to-date batting note totals.
@@ -1042,10 +1008,8 @@ def create_html(
         batting_by_game
     )
 
-    # This tracks the season-to-date pitching records.
+    # Tracks season-to-date pitching records.
     records = {}
-
-    html += '<div class="games-grid">'
 
     for game in games:
 
@@ -1061,6 +1025,7 @@ def create_html(
             []
         )
 
+        # Generate this game's box score.
         html += make_game_section(
             game,
             batting_rows,
@@ -1068,12 +1033,13 @@ def create_html(
             records
         )
 
-    html += "</div>"
-
-        # Update pitcher records AFTER generating the current game.
+        # Update pitcher records AFTER generating
+        # the current game's box score.
         for pitcher in pitching_rows:
 
-            decision = get_pitcher_decision(pitcher)
+            decision = get_pitcher_decision(
+                pitcher
+            )
 
             if decision:
 
@@ -1086,13 +1052,14 @@ def create_html(
     html += """
 </div>
 
+</div>
+
 </body>
 
 </html>
 """
 
     return html
-
 
 def main():
 
