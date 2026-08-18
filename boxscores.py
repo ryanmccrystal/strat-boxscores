@@ -779,88 +779,109 @@ def create_html(
         background: #ffffff;
         color: #111111;
         margin: 0;
-        padding: 30px;
+        padding: 20px;
     }
 
     .container {
         max-width: 1800px;
         margin: 0 auto;
     }
-    
+
+    /* =========================
+       PAGE TITLE
+       ========================= */
+
+    h1 {
+        font-size: 24px;
+        margin: 0 0 20px 0;
+    }
+
+    /* =========================
+       GAME GRID
+       ========================= */
+
     .games-grid {
         display: grid;
         grid-template-columns: repeat(5, minmax(0, 1fr));
-        gap: 20px;
+        gap: 16px;
+        align-items: start;
     }
 
-    h1 {
-        font-size: 26px;
-        margin-bottom: 30px;
-    }
+    /* =========================
+       INDIVIDUAL GAME
+       ========================= */
 
     .game {
-        margin-bottom: 45px;
-        padding-bottom: 25px;
-        border-bottom: 2px solid #222;
+        margin: 0;
+        padding: 10px;
+        border: 1px solid #222;
+        font-size: 10px;
+        min-width: 0;
     }
 
+    /* =========================
+       GAME HEADER
+       ========================= */
+
     .game-header {
-        margin-bottom: 15px;
+        margin-bottom: 10px;
     }
 
     .score {
-        font-size: 20px;
-        margin-bottom: 4px;
+        font-size: 14px;
+        margin-bottom: 2px;
+        line-height: 1.2;
     }
 
     .game-info {
-        font-size: 13px;
+        font-size: 9px;
         color: #666;
+        line-height: 1.2;
     }
 
     .game-note {
-        font-size: 13px;
+        font-size: 9px;
         font-weight: bold;
-        margin-top: 4px;
+        margin-top: 2px;
     }
 
+    /* =========================
+       BATTING
+       ========================= */
+
     .team-section {
-        margin-top: 18px;
+        margin-top: 10px;
     }
 
     .team-section h2 {
-        font-size: 17px;
-        margin: 0 0 5px 0;
+        font-size: 12px;
+        margin: 0 0 3px 0;
     }
 
-    .batting-table,
-    .pitching-table {
+    .batting-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 14px;
+        font-size: 9px;
     }
 
-    .batting-table th,
-    .pitching-table th {
+    .batting-table th {
         font-weight: normal;
         border-bottom: 1px solid #222;
-        padding: 3px 5px;
+        padding: 2px 2px;
         text-align: right;
     }
 
-    .batting-table th.player-column,
-    .pitching-table th.pitcher-column {
+    .batting-table th.player-column {
         text-align: left;
     }
 
-    .batting-table td,
-    .pitching-table td {
-        padding: 3px 5px;
+    .batting-table td {
+        padding: 2px 2px;
         text-align: right;
+        line-height: 1.15;
     }
 
-    .batting-table td.player-name,
-    .pitching-table td.pitcher-name {
+    .batting-table td.player-name {
         text-align: left;
         white-space: nowrap;
     }
@@ -870,31 +891,125 @@ def create_html(
         font-weight: bold;
     }
 
+    /* =========================
+       NOTES
+       ========================= */
+
+    .notes {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-size: 9px;
+        line-height: 1.35;
+    }
+
+    /* =========================
+       PITCHING
+       ========================= */
+
     .pitching-section {
-        margin-top: 18px;
+        margin-top: 10px;
     }
 
     .pitching-section h3 {
-        font-size: 17px;
-        margin: 0 0 5px 0;
+        font-size: 12px;
+        margin: 0 0 3px 0;
     }
 
-    .notes {
-        margin-top: 16px;
-        margin-bottom: 16px;
-        font-size: 13px;
-        line-height: 1.5;
-    }    
+    .pitching-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 9px;
+    }
+
+    .pitching-table th {
+        font-weight: normal;
+        border-bottom: 1px solid #222;
+        padding: 2px 2px;
+        text-align: right;
+    }
+
+    .pitching-table th.pitcher-column {
+        text-align: left;
+    }
+
+    .pitching-table td {
+        padding: 2px 2px;
+        text-align: right;
+        line-height: 1.15;
+    }
+
+    .pitching-table td.pitcher-name {
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    /* =========================
+       LARGE / MEDIUM SCREENS
+       ========================= */
+
+    @media (max-width: 1400px) {
+
+        .games-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+    }
+
+    @media (max-width: 1150px) {
+
+        .games-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+    }
+
+    @media (max-width: 850px) {
+
+        body {
+            padding: 12px;
+        }
+
+        .games-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+    }
+
+    /* =========================
+       PHONES
+       ========================= */
 
     @media (max-width: 600px) {
 
         body {
-            padding: 15px;
+            padding: 10px;
+        }
+
+        .games-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .game {
+            padding: 12px;
+            font-size: 12px;
+        }
+
+        .score {
+            font-size: 17px;
+        }
+
+        .game-info {
+            font-size: 11px;
+        }
+
+        .team-section h2,
+        .pitching-section h3 {
+            font-size: 14px;
         }
 
         .batting-table,
         .pitching-table {
-            font-size: 13px;
+            font-size: 12px;
         }
 
         .batting-table th,
@@ -903,6 +1018,11 @@ def create_html(
         .pitching-table td {
             padding: 3px;
         }
+
+        .notes {
+            font-size: 11px;
+        }
+
     }
 
 </style>
@@ -925,6 +1045,8 @@ def create_html(
     # This tracks the season-to-date pitching records.
     records = {}
 
+    html += '<div class="games-grid">'
+
     for game in games:
 
         game_id = game["game_id"]
@@ -945,6 +1067,8 @@ def create_html(
             pitching_rows,
             records
         )
+
+    html += "</div>"
 
         # Update pitcher records AFTER generating the current game.
         for pitcher in pitching_rows:
