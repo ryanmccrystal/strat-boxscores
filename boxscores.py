@@ -204,6 +204,7 @@ def get_pitching_data(pitching):
                 opponent_code
             ),
             "IP": row[4].strip(),
+            "H": row[6].strip(),
             "R": row[7].strip(),
             "ER": row[8].strip(),
             "BB": row[9].strip(),
