@@ -681,11 +681,49 @@ def make_game_section(
         if pitcher["team_code"] not in teams:
             teams.append(pitcher["team_code"])
 
-    winner = html_escape(game["winner"])
-    loser = html_escape(game["loser"])
+    # Team nicknames for the game headline
+    TEAM_NICKNAMES = {
+        "Portland Beavers": "Beavers",
+        "Iowa Cubs": "Cubs",
+        "Pawtucket Red Sox": "Red Sox",
+        "Richmond Braves": "Braves",
+        "Omaha Royals": "Royals",
+        "Dunedin Blue Jays": "Blue Jays",
+    }
 
-    winner_runs = html_escape(game["winner_runs"])
-    loser_runs = html_escape(game["loser_runs"])
+    winner = TEAM_NICKNAMES.get(
+        game["winner"],
+        game["winner"]
+    )
+
+    loser = TEAM_NICKNAMES.get(
+        game["loser"],
+        game["loser"]
+    )
+
+    winner_runs = html_escape(
+        game["winner_runs"]
+    )
+
+    loser_runs = html_escape(
+        game["loser_runs"]
+    )
+
+    # Build the score headline.
+    score_text = (
+        f"{html_escape(winner)} "
+        f"{winner_runs}, "
+        f"{html_escape(loser)} "
+        f"{loser_runs}"
+    )
+
+    # Add extra-inning indicator directly after the score.
+    if game["note"]:
+        score_text += (
+            f" <span class=\"extra-innings\">"
+            f"{html_escape(game['note'])}"
+            f"</span>"
+        )
 
     html = f"""
     <article class="game">
@@ -693,7 +731,7 @@ def make_game_section(
         <div class="game-header">
 
             <div class="score">
-                <strong>{winner} {winner_runs}, {loser} {loser_runs}</strong>
+                <strong>{score_text}</strong>
             </div>
 
             <div class="game-info">
@@ -701,17 +739,7 @@ def make_game_section(
                 &nbsp; | &nbsp;
                 {html_escape(game["date"])}
             </div>
-    """
 
-    if game["note"]:
-
-        html += f"""
-            <div class="game-note">
-                {html_escape(game["note"])}
-            </div>
-        """
-
-    html += """
         </div>
     """
 
@@ -749,7 +777,6 @@ def make_game_section(
     """
 
     return html
-
 
 def create_html(
     games,
@@ -833,6 +860,11 @@ def create_html(
         font-weight: 700;
         margin-bottom: 2px;
         line-height: 1.2;
+    }
+
+    .extra-innings {
+        font-weight: 600;
+        margin-left: 3px;
     }
 
     .game-info {
