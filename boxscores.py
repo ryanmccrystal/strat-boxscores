@@ -808,11 +808,13 @@ def make_linescore_section(
     linescore_rows
 ):
     """
-    Create the inning-by-inning linescore.
+    Create the compact inning-by-inning linescore.
 
     Normal games display innings 1-9.
-    Extra-inning games display through the
-    appropriate extra inning.
+    Extra-inning games display through the appropriate
+    extra inning.
+
+    Innings are visually grouped 1-3, 4-6, 7-9, etc.
     """
 
     if not linescore_rows:
@@ -835,31 +837,10 @@ def make_linescore_section(
     # Never display beyond inning 14.
     max_inning = min(max_inning, 14)
 
-    # Create inning headers.
-    inning_headers = ""
-
-    for inning in range(1, max_inning + 1):
-
-        inning_headers += (
-            f"<th>{inning}</th>"
-        )
-
-    html = f"""
+    html = """
     <div class="linescore">
 
         <table class="linescore-table">
-
-            <thead>
-
-                <tr>
-                    <th class="linescore-team"></th>
-                    {inning_headers}
-                    <th>R</th>
-                    <th>H</th>
-                    <th>E</th>
-                </tr>
-
-            </thead>
 
             <tbody>
     """
@@ -894,14 +875,28 @@ def make_linescore_section(
             if value == "":
                 value = "0"
 
-            html += f"""
-                    <td>{html_escape(value)}</td>
-            """
+            inning_number = index + 1
+
+            # Add extra spacing after innings 3, 6, 9, etc.
+            if inning_number % 3 == 1 and inning_number > 1:
+                html += '<td class="inning-group-start">'
+            else:
+                html += "<td>"
+
+            html += f"{html_escape(value)}</td>"
 
         html += f"""
-                    <td>{html_escape(row["R"])}</td>
-                    <td>{html_escape(row["H"])}</td>
-                    <td>{html_escape(row["E"])}</td>
+                    <td class="linescore-total">
+                        {html_escape(row["R"])}
+                    </td>
+
+                    <td class="linescore-total">
+                        {html_escape(row["H"])}
+                    </td>
+
+                    <td class="linescore-total">
+                        {html_escape(row["E"])}
+                    </td>
 
                 </tr>
         """
@@ -1250,22 +1245,26 @@ def create_html(
         font-size: 13px;
     }
     
-    .linescore-table th,
     .linescore-table td {
-        padding: 2px;
+        padding: 2px 1px;
         text-align: center;
         line-height: 1.05;
     }
     
-    .linescore-table th {
-        font-weight: 600;
-        border-bottom: 1px solid #222;
-    }
-    
     .linescore-table .linescore-team {
-        width: 46%;
+        width: 30%;
         text-align: left;
         font-weight: 700;
+        padding-right: 4px;
+    }
+    
+    .linescore-table .inning-group-start {
+        padding-left: 7px;
+    }
+    
+    .linescore-table .linescore-total {
+        font-weight: 600;
+        padding-left: 3px;
     }
 
     /* =========================
