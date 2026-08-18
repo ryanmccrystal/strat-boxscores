@@ -583,7 +583,7 @@ def make_notes_section(
                 player["batter"]
             )
 
-            totals = season_totals.get(
+            totals = note_season_totals.get(
                 player["batter"],
                 {}
             )
