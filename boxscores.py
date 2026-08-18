@@ -947,7 +947,7 @@ def create_html(
     .pitching-table th:not(.pitcher-column),
     .pitching-table td:not(.pitcher-name) {
         width: 9%;
-        text-align: right;
+        text-align: center;
     }
     
     /* Headers */
