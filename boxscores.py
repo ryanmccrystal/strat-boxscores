@@ -602,6 +602,42 @@ def make_notes_section(
     </div>
     """
 
+def format_innings_pitched(ip):
+    """
+    Convert Strat-o-Matic innings notation to standard
+    baseball box-score notation.
+
+    Examples:
+        7       -> 7
+        7 1/3   -> 7.1
+        7 2/3   -> 7.2
+        6 1/3   -> 6.1
+        6 2/3   -> 6.2
+    """
+
+    ip = str(ip).strip()
+
+    if not ip:
+        return ""
+
+    if "1/3" in ip:
+        whole = ip.replace("1/3", "").strip()
+
+        if whole:
+            return f"{whole}.1"
+
+        return "0.1"
+
+    if "2/3" in ip:
+        whole = ip.replace("2/3", "").strip()
+
+        if whole:
+            return f"{whole}.2"
+
+        return "0.2"
+
+    return ip
+
 def make_pitching_section(team_code, pitchers, records):
 
     team_name = TEAM_NAMES.get(team_code, team_code)
@@ -645,7 +681,7 @@ def make_pitching_section(team_code, pitchers, records):
         html += f"""
                 <tr>
                     <td class="pitcher-name">{display_name}</td>
-                    <td>{html_escape(pitcher["IP"])}</td>
+                    <td>{format_innings_pitched(pitcher["IP"])}</td>
                     <td>{html_escape(pitcher["H"])}</td>
                     <td>{html_escape(pitcher["R"])}</td>
                     <td>{html_escape(pitcher["ER"])}</td>
