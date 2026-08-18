@@ -614,7 +614,7 @@ def make_pitching_section(team_code, pitchers, records):
     html = f"""
     <section class="pitching-section">
 
-        <table class="pitching-table">>
+        <table class="pitching-table">
 
             <thead>
                 <tr>
