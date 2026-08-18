@@ -1341,6 +1341,12 @@ def create_html(
         line-height: 1.25;
     }
 
+    .linescore-note {
+        margin-top: 9px;
+        font-size: 13px;
+        line-height: 1.25;
+    }
+
     /* =========================
        RESPONSIVE LAYOUT
        ========================= */
