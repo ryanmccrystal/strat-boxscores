@@ -501,7 +501,8 @@ def get_note_season_totals(games, batting_by_game):
 
 def make_notes_section(
     batting_rows,
-    season_totals
+    note_season_totals,
+    linescore_rows
 ):
     """
     Create the compact Notes paragraph.
@@ -523,6 +524,40 @@ def make_notes_section(
     ]
 
     parts = []
+
+    lob_text = ""
+
+    ordered_linescore_rows = sorted(
+        linescore_rows,
+        key=lambda row: (
+            0 if row["home_away"] == "A" else 1
+        )
+    )
+
+    if len(ordered_linescore_rows) == 2:
+
+        away = ordered_linescore_rows[0]
+        home = ordered_linescore_rows[1]
+
+        away_name = TEAM_NAMES.get(
+            away["team_code"],
+            away["team_code"]
+        )
+
+        home_name = TEAM_NAMES.get(
+            home["team_code"],
+            home["team_code"]
+        )
+
+        if away["LOB"] or home["LOB"]:
+
+            lob_text = (
+                f"<strong>LOB:</strong> "
+                f"{html_escape(away_name)} "
+                f"{html_escape(away['LOB'])}, "
+                f"{html_escape(home_name)} "
+                f"{html_escape(home['LOB'])}."
+            )
 
     # Categories with season totals
     for category, label in categories_with_totals:
@@ -792,6 +827,8 @@ def get_linescore_data(linescore):
             "R": row[19].strip(),
             "H": row[20].strip(),
             "E": row[21].strip(),
+            "LOB": row[22].strip(),
+            "note": row[23].strip(),
         }
 
         if game_id not in linescores_by_game:
@@ -1037,7 +1074,8 @@ def make_game_section(
 
     notes_html = make_notes_section(
         batting_rows,
-        note_season_totals
+        note_season_totals,
+        linescore_rows
     )
 
     html += notes_html
@@ -1050,6 +1088,29 @@ def make_game_section(
             pitching_rows,
             records
         )
+
+    # Linescore notes
+    linescore_notes = []
+
+    for row in linescore_rows:
+
+        if row["note"].strip():
+
+            linescore_notes.append(
+                row["note"].strip()
+            )
+
+    if linescore_notes:
+
+        html += '<div class="linescore-note">'
+
+        for note in linescore_notes:
+
+            html += (
+                f"<em>{html_escape(note)}</em><br>"
+            )
+
+        html += "</div>"    
 
     html += """
     </article>
