@@ -1241,7 +1241,7 @@ def create_html(
         width: 100%;
         table-layout: fixed;
         border-collapse: collapse;
-        font-size: 13px;
+        font-size: 14px;
     }
     
     /* Player / pitcher name column */
@@ -1310,7 +1310,7 @@ def create_html(
         width: 100%;
         table-layout: fixed;
         border-collapse: collapse;
-        font-size: 13px;
+        font-size: 14px;
         border-top: 1px solid #222;
         border-bottom: 1px solid #222;
     }
@@ -1344,7 +1344,7 @@ def create_html(
     .notes {
         margin-top: 9px;
         margin-bottom: 9px;
-        font-size: 13px;
+        font-size: 14px;
         line-height: 1.25;
     }
 
