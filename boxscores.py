@@ -1201,7 +1201,7 @@ def create_html(
        ========================= */
 
     .game-header {
-        margin-bottom: 6px;
+        margin-bottom: 4px;
     }
 
     .score {
@@ -1233,7 +1233,7 @@ def create_html(
        ========================= */
 
     .team-section {
-        margin-top: 6px;
+        margin-top: 4px;
     }
 
     .batting-table,
@@ -1294,7 +1294,7 @@ def create_html(
     }
 
     .pitching-section {
-        margin-top: 6px;
+        margin-top: 4px;
     }
 
     /* =========================
@@ -1302,8 +1302,8 @@ def create_html(
     ========================= */
 
     .linescore {
-        margin-top: 6px;
-        margin-bottom: 6px;
+        margin-top: 4px;
+        margin-bottom: 4px;
     }
     
     .linescore-table {
@@ -1342,14 +1342,14 @@ def create_html(
        ========================= */
 
     .notes {
-        margin-top: 6px;
-        margin-bottom: 6px;
+        margin-top: 4px;
+        margin-bottom: 4px;
         font-size: 14px;
         line-height: 1.25;
     }
 
     .linescore-note {
-        margin-top: 6px;
+        margin-top: 4px;
         font-size: 13px;
         line-height: 1.25;
     }
