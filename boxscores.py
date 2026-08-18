@@ -883,43 +883,61 @@ def create_html(
     }
 
     /* =========================
-       BATTING
+       BATTING/PITCHING TABLES
        ========================= */
 
     .team-section {
         margin-top: 12px;
     }
 
-    .batting-table {
+    .batting-table,
+    .pitching-table {
         width: 100%;
+        table-layout: fixed;
         border-collapse: collapse;
         font-size: 13px;
     }
     
-    .batting-table th {
+    /* Player / pitcher name column */
+    .batting-table th.player-column,
+    .batting-table td.player-name,
+    .pitching-table th.pitcher-column,
+    .pitching-table td.pitcher-name {
+        width: 46%;
+        text-align: left;
+    }
+    
+    /* Six statistical columns */
+    .batting-table th:not(.player-column),
+    .batting-table td:not(.player-name),
+    .pitching-table th:not(.pitcher-column),
+    .pitching-table td:not(.pitcher-name) {
+        width: 9%;
+        text-align: right;
+    }
+    
+    /* Headers */
+    .batting-table th,
+    .pitching-table th {
         font-weight: 600;
         border-bottom: 1px solid #222;
         padding: 3px 2px;
-        text-align: right;
         line-height: 1.1;
     }
     
-    .batting-table th.player-column {
-        text-align: left;
-        font-weight: 700;
-    }
-    
-    .batting-table td {
+    /* Player/pitcher rows */
+    .batting-table td,
+    .pitching-table td {
         padding: 3px 2px;
-        text-align: right;
         line-height: 1.15;
     }
     
-    .batting-table td.player-name {
-        text-align: left;
+    .batting-table td.player-name,
+    .pitching-table td.pitcher-name {
         white-space: nowrap;
     }
     
+    /* Totals */
     .batting-table tr.totals {
         border-top: 1px solid #222;
         font-weight: 700;
@@ -934,40 +952,6 @@ def create_html(
         margin-bottom: 12px;
         font-size: 13px;
         line-height: 1.35;
-    }
-
-    /* =========================
-       PITCHING
-       ========================= */
-
-    .pitching-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 13px;
-    }
-    
-    .pitching-table th {
-        font-weight: 600;
-        border-bottom: 1px solid #222;
-        padding: 3px 2px;
-        text-align: right;
-        line-height: 1.1;
-    }
-    
-    .pitching-table th.pitcher-column {
-        text-align: left;
-        font-weight: 700;
-    }
-    
-    .pitching-table td {
-        padding: 3px 2px;
-        text-align: right;
-        line-height: 1.15;
-    }
-    
-    .pitching-table td.pitcher-name {
-        text-align: left;
-        white-space: nowrap;
     }
 
     /* =========================
