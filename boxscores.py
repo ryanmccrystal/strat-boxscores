@@ -605,6 +605,13 @@ def make_notes_section(
                 + "."
             )
 
+        # Add LOB immediately after Errors
+        if label == "E" and lob_text:
+
+            parts.append(
+                lob_text
+            )
+
     # Categories without season totals
     for category, label in categories_without_totals:
 
