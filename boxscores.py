@@ -890,9 +890,9 @@ def create_html(
     .batting-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 12px;
+        font-size: 13px;
     }
-
+    
     .batting-table th {
         font-weight: 600;
         border-bottom: 1px solid #222;
@@ -900,22 +900,23 @@ def create_html(
         text-align: right;
         line-height: 1.1;
     }
-
+    
     .batting-table th.player-column {
         text-align: left;
+        font-weight: 700;
     }
-
+    
     .batting-table td {
         padding: 3px 2px;
         text-align: right;
         line-height: 1.15;
     }
-
+    
     .batting-table td.player-name {
         text-align: left;
         white-space: nowrap;
     }
-
+    
     .batting-table tr.totals {
         border-top: 1px solid #222;
         font-weight: 700;
@@ -928,30 +929,20 @@ def create_html(
     .notes {
         margin-top: 12px;
         margin-bottom: 12px;
-        font-size: 11px;
-        line-height: 1.4;
+        font-size: 13px;
+        line-height: 1.35;
     }
 
     /* =========================
        PITCHING
        ========================= */
 
-    .pitching-section {
-        margin-top: 12px;
-    }
-
-    .pitching-section h3 {
-        font-size: 15px;
-        font-weight: 700;
-        margin: 0 0 4px 0;
-    }
-
     .pitching-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 12px;
+        font-size: 13px;
     }
-
+    
     .pitching-table th {
         font-weight: 600;
         border-bottom: 1px solid #222;
@@ -959,17 +950,18 @@ def create_html(
         text-align: right;
         line-height: 1.1;
     }
-
+    
     .pitching-table th.pitcher-column {
         text-align: left;
+        font-weight: 700;
     }
-
+    
     .pitching-table td {
         padding: 3px 2px;
         text-align: right;
         line-height: 1.15;
     }
-
+    
     .pitching-table td.pitcher-name {
         text-align: left;
         white-space: nowrap;
