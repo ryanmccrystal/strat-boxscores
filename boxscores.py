@@ -15,6 +15,15 @@ TEAM_NAMES = {
     "DUNE": "Dunedin",
 }
 
+TEAM_NICKNAMES = {
+    "Portland Beavers": "Beavers",
+    "Iowa Cubs": "Cubs",
+    "Pawtucket Red Sox": "Red Sox",
+    "Richmond Braves": "Braves",
+    "Omaha Royals": "Royals",
+    "Dunedin Blue Jays": "Blue Jays",
+}
+
 
 def get_google_sheet():
     scopes = [
@@ -738,12 +747,182 @@ def get_home_away_order(linescore):
 
     return game_order
 
+def get_linescore_data(linescore):
+    """
+    Read the Linescore tab.
+
+    B = GameID
+    D = Team code
+    E = H/A
+    F:S = innings 1-14
+    T = Runs
+    U = Hits
+    V = Errors
+    """
+
+    rows = linescore.get_all_values()
+
+    linescores_by_game = {}
+
+    for row in rows[1:]:
+
+        if len(row) < 22:
+            continue
+
+        game_id = row[1].strip()
+        team_code = row[3].strip()
+        home_away = row[4].strip().upper()
+
+        if not game_id or not team_code:
+            continue
+
+        innings = []
+
+        # F:S = innings 1-14
+        for index in range(5, 19):
+
+            value = row[index].strip()
+
+            innings.append(value)
+
+        linescore = {
+            "team_code": team_code,
+            "home_away": home_away,
+            "innings": innings,
+            "R": row[19].strip(),
+            "H": row[20].strip(),
+            "E": row[21].strip(),
+        }
+
+        if game_id not in linescores_by_game:
+            linescores_by_game[game_id] = []
+
+        linescores_by_game[game_id].append(
+            linescore
+        )
+
+    return linescores_by_game
+
+def make_linescore_section(
+    game,
+    linescore_rows
+):
+    """
+    Create the inning-by-inning linescore.
+
+    Normal games display innings 1-9.
+    Extra-inning games display through the
+    appropriate extra inning.
+    """
+
+    if not linescore_rows:
+        return ""
+
+    # Determine how many innings to display.
+    max_inning = 9
+
+    note = game["note"].strip().upper()
+
+    if note.startswith("F/"):
+
+        try:
+            max_inning = int(
+                note.replace("F/", "")
+            )
+        except ValueError:
+            max_inning = 9
+
+    # Never display beyond inning 14.
+    max_inning = min(max_inning, 14)
+
+    # Create inning headers.
+    inning_headers = ""
+
+    for inning in range(1, max_inning + 1):
+
+        inning_headers += (
+            f"<th>{inning}</th>"
+        )
+
+    html = f"""
+    <div class="linescore">
+
+        <table class="linescore-table">
+
+            <thead>
+
+                <tr>
+                    <th class="linescore-team"></th>
+                    {inning_headers}
+                    <th>R</th>
+                    <th>H</th>
+                    <th>E</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+    """
+
+    # Always Away first, Home second.
+    ordered_rows = sorted(
+        linescore_rows,
+        key=lambda row: (
+            0 if row["home_away"] == "A" else 1
+        )
+    )
+
+    for row in ordered_rows:
+
+        team_name = TEAM_NAMES.get(
+            row["team_code"],
+            row["team_code"]
+        )
+
+        html += f"""
+                <tr>
+
+                    <td class="linescore-team">
+                        {html_escape(team_name)}
+                    </td>
+        """
+
+        for index in range(max_inning):
+
+            value = row["innings"][index]
+
+            if value == "":
+                value = "0"
+
+            html += f"""
+                    <td>{html_escape(value)}</td>
+            """
+
+        html += f"""
+                    <td>{html_escape(row["R"])}</td>
+                    <td>{html_escape(row["H"])}</td>
+                    <td>{html_escape(row["E"])}</td>
+
+                </tr>
+        """
+
+    html += """
+            </tbody>
+
+        </table>
+
+    </div>
+    """
+
+    return html
+
 def make_game_section(
     game,
     batting_rows,
     pitching_rows,
     records,
-    home_away_order
+    home_away_order,
+    linescore_rows
 ):
 
     teams = []
@@ -849,6 +1028,12 @@ def make_game_section(
             batting_rows
         )
 
+    # Linescore
+    html += make_linescore_section(
+        game,
+        linescore_rows
+    )
+
     # Notes section
     note_season_totals = game.get(
         "note_season_totals",
@@ -881,7 +1066,8 @@ def create_html(
     games,
     batting_by_game,
     pitching_by_game,
-    home_away_order
+    home_away_order,
+    linescore_by_game
 ):
 
     html = """<!DOCTYPE html>
@@ -1049,6 +1235,40 @@ def create_html(
     }
 
     /* =========================
+    LINESCORE
+    ========================= */
+
+    .linescore {
+        margin-top: 9px;
+        margin-bottom: 9px;
+    }
+    
+    .linescore-table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+    
+    .linescore-table th,
+    .linescore-table td {
+        padding: 2px;
+        text-align: center;
+        line-height: 1.05;
+    }
+    
+    .linescore-table th {
+        font-weight: 600;
+        border-bottom: 1px solid #222;
+    }
+    
+    .linescore-table .linescore-team {
+        width: 46%;
+        text-align: left;
+        font-weight: 700;
+    }
+
+    /* =========================
        NOTES
        ========================= */
 
@@ -1173,12 +1393,18 @@ def create_html(
             []
         )
 
+        linescore_rows = linescore_by_game.get(
+            game_id,
+            []
+        )
+
         html += make_game_section(
             game,
             batting_rows,
             pitching_rows,
             records,
-            home_away_order
+            home_away_order,
+            linescore_rows
         )
 
         # Update pitcher records AFTER generating
@@ -1235,6 +1461,10 @@ def main():
     )
 
     home_away_order = get_home_away_order(
+        linescore
+    )
+
+    linescore_by_game = get_linescore_data(
         linescore
     )
 
