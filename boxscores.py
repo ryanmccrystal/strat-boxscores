@@ -604,15 +604,13 @@ def make_notes_section(
 
 def format_innings_pitched(ip):
     """
-    Convert Strat-o-Matic innings notation to standard
-    baseball box-score notation.
+    Display innings pitched with baseball-style
+    superscript/subscript fractions.
 
     Examples:
         7       -> 7
-        7 1/3   -> 7.1
-        7 2/3   -> 7.2
-        6 1/3   -> 6.1
-        6 2/3   -> 6.2
+        7 1/3   -> 7¹⁄₃
+        7 2/3   -> 7²⁄₃
     """
 
     ip = str(ip).strip()
@@ -624,19 +622,19 @@ def format_innings_pitched(ip):
         whole = ip.replace("1/3", "").strip()
 
         if whole:
-            return f"{whole}.1"
+            return f"{html_escape(whole)}¹⁄₃"
 
-        return "0.1"
+        return "¹⁄₃"
 
     if "2/3" in ip:
         whole = ip.replace("2/3", "").strip()
 
         if whole:
-            return f"{whole}.2"
+            return f"{html_escape(whole)}²⁄₃"
 
-        return "0.2"
+        return "²⁄₃"
 
-    return ip
+    return html_escape(ip)
 
 def make_pitching_section(team_code, pitchers, records):
 
@@ -977,6 +975,10 @@ def create_html(
     .batting-table tr.totals {
         border-top: 1px solid #222;
         font-weight: 700;
+    }
+
+    .ip-fraction {
+        font-size: 75%;
     }
 
     /* =========================
