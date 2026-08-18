@@ -133,6 +133,17 @@ def get_batting_data(batting, player_positions):
             "RBI": row[8].strip(),
             "BB": row[9].strip(),
             "K": row[10].strip(),
+
+            # Notes section
+            "2B": row[11].strip(),
+            "3B": row[12].strip(),
+            "HR": row[13].strip(),
+            "SB": row[14].strip(),
+            "CS": row[15].strip(),
+            "GIDP": row[16].strip(),
+            "SF": row[17].strip(),
+            "E": row[20].strip(),
+            "SH": row[29].strip(),
         }
 
         if game_id not in batting_by_game:
@@ -423,6 +434,174 @@ def pitcher_display_name(pitcher, decision, records):
 
     return name
 
+def get_note_season_totals(games, batting_by_game):
+    """
+    Calculate season-to-date totals for:
+    E, 2B, 3B, HR, SB, CS
+
+    The current game is included in the total.
+    """
+
+    season_totals = {}
+
+    for game in games:
+
+        game_id = game["game_id"]
+
+        players = batting_by_game.get(
+            game_id,
+            []
+        )
+
+        for player in players:
+
+            player_name = player["batter"]
+
+            if player_name not in season_totals:
+                season_totals[player_name] = {
+                    "E": 0,
+                    "2B": 0,
+                    "3B": 0,
+                    "HR": 0,
+                    "SB": 0,
+                    "CS": 0,
+                }
+
+            for category in [
+                "E",
+                "2B",
+                "3B",
+                "HR",
+                "SB",
+                "CS",
+            ]:
+
+                value = player[category]
+
+                if value:
+                    season_totals[player_name][category] += int(
+                        value
+                    )
+
+        # Store a snapshot for this game.
+        game["note_season_totals"] = {
+            player_name: totals.copy()
+            for player_name, totals in season_totals.items()
+        }
+
+    return season_totals
+
+def make_notes_section(
+    batting_rows,
+    season_totals
+):
+    """
+    Create the compact Notes paragraph.
+    """
+
+    categories_with_totals = [
+        ("E", "E"),
+        ("2B", "2B"),
+        ("3B", "3B"),
+        ("HR", "HR"),
+        ("SB", "SB"),
+        ("CS", "CS"),
+    ]
+
+    categories_without_totals = [
+        ("GIDP", "GIDP"),
+        ("SH", "SH"),
+        ("SF", "SF"),
+    ]
+
+    parts = []
+
+    # Categories with season totals
+    for category, label in categories_with_totals:
+
+        events = []
+
+        for player in batting_rows:
+
+            value = player[category]
+
+            if not value:
+                continue
+
+            try:
+                count = int(value)
+            except ValueError:
+                continue
+
+            if count <= 0:
+                continue
+
+            player_name = html_escape(
+                player["batter"]
+            )
+
+            totals = season_totals.get(
+                player["batter"],
+                {}
+            )
+
+            season_total = totals.get(
+                category,
+                count
+            )
+
+            events.append(
+                f"{player_name} ({season_total})"
+            )
+
+        if events:
+
+            parts.append(
+                f"<strong>{label}:</strong> "
+                + ", ".join(events)
+                + "."
+            )
+
+    # Categories without season totals
+    for category, label in categories_without_totals:
+
+        events = []
+
+        for player in batting_rows:
+
+            value = player[category]
+
+            if not value:
+                continue
+
+            try:
+                count = int(value)
+            except ValueError:
+                continue
+
+            if count <= 0:
+                continue
+
+            events.append(
+                html_escape(player["batter"])
+            )
+
+        if events:
+
+            parts.append(
+                f"<strong>{label}:</strong> "
+                + ", ".join(events)
+                + "."
+            )
+
+    if not parts:
+        return ""
+
+    return f"""
+    <div class="notes">
+        {" ".join(parts)}
+    </div>
+    """
 
 def make_pitching_section(team_code, pitchers, records):
 
@@ -546,6 +725,19 @@ def make_game_section(
             team_code,
             batting_rows
         )
+
+    # Notes section
+    note_season_totals = game.get(
+        "note_season_totals",
+        {}
+    )
+
+    notes_html = make_notes_section(
+        batting_rows,
+        note_season_totals
+    )
+
+    html += notes_html
 
     # Add pitching sections
     for team_code in teams:
@@ -681,6 +873,13 @@ def create_html(
         margin: 0 0 5px 0;
     }
 
+    .notes {
+        margin-top: 16px;
+        margin-bottom: 16px;
+        font-size: 13px;
+        line-height: 1.5;
+    }    
+
     @media (max-width: 600px) {
 
         body {
@@ -711,7 +910,13 @@ def create_html(
 <h1>Strat-o-Matic Box Scores</h1>
 """
 
-    # This tracks the season-to-date records.
+    # Calculate season-to-date batting note totals.
+    get_note_season_totals(
+        games,
+        batting_by_game
+    )
+
+    # This tracks the season-to-date pitching records.
     records = {}
 
     for game in games:
