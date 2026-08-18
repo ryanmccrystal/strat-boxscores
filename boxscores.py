@@ -620,6 +620,7 @@ def make_pitching_section(team_code, pitchers, records):
                 <tr>
                     <th class="pitcher-column">{html_escape(team_name)}</th>
                     <th>IP</th>
+                    <th>H</th>
                     <th>R</th>
                     <th>ER</th>
                     <th>BB</th>
@@ -644,6 +645,7 @@ def make_pitching_section(team_code, pitchers, records):
                 <tr>
                     <td class="pitcher-name">{display_name}</td>
                     <td>{html_escape(pitcher["IP"])}</td>
+                    <td>{html_escape(pitcher["H"])}</td>
                     <td>{html_escape(pitcher["R"])}</td>
                     <td>{html_escape(pitcher["ER"])}</td>
                     <td>{html_escape(pitcher["BB"])}</td>
