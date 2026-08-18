@@ -772,6 +772,10 @@ def create_html(
 
 <title>Strat-o-Matic Box Scores</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+
 <style>
 
     body {
