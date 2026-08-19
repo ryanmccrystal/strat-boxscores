@@ -594,40 +594,29 @@ def main():
 
     spreadsheet = get_google_sheet()
 
-    logos = spreadsheet.worksheet("Logos")
-
-    logo_rows = logos.get(
-        "A1:B100",
-        value_render_option="FORMULA"
-    )
-
-    print("========== LOGOS ==========")
-
-    for row_number, row in enumerate(
-        logo_rows,
-        start=1
-    ):
-
-        print(
-            f"Row {row_number}: {row}"
-        )
-
-    print("===========================")
-
+    # Get Iowa statistics.
     rows = get_iowa_data(
         spreadsheet
     )
 
+    # Get the Real Tm -> logo URL lookup.
+    logo_map = get_logo_map(
+        spreadsheet
+    )
+
+    # Generate the Iowa page.
     html_output = make_team_page(
         rows,
         logo_map
     )
 
+    # Make sure the teams directory exists.
     os.makedirs(
         "teams",
         exist_ok=True
     )
 
+    # Write Iowa's page.
     with open(
         "teams/iowa.html",
         "w",
@@ -644,4 +633,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
