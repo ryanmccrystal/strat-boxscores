@@ -121,7 +121,8 @@ def get_section_rows(
 
 def make_table(
     section_rows,
-    section_name
+    section_name,
+    logo_map
 ):
 
     if len(section_rows) < 2:
@@ -131,7 +132,7 @@ def make_table(
 
     data_rows = section_rows[1:]
 
-    # Find the actual used columns.
+    # Find the actual last used column.
     last_column = 0
 
     for row in section_rows:
@@ -139,12 +140,29 @@ def make_table(
         for index, value in enumerate(row):
 
             if value.strip():
+
                 last_column = max(
                     last_column,
                     index
                 )
 
     header = header[:last_column + 1]
+
+    # Find the Real Tm / Tm-Yr column.
+    real_team_column = None
+
+    for index, value in enumerate(header):
+
+        header_value = value.strip().lower()
+
+        if header_value in (
+            "real tm",
+            "tm/yr",
+            "tm - yr"
+        ):
+
+            real_team_column = index
+            break
 
     html_output = """
     <div class="table-wrapper">
@@ -153,7 +171,13 @@ def make_table(
                 <tr>
     """
 
-    for value in header:
+    # Logo column.
+    html_output += """
+                    <th class="logo-header"></th>
+    """
+
+    # Spreadsheet headers.
+    for value in header[1:]:
 
         html_output += (
             f"<th>{html_escape(value)}</th>"
@@ -168,72 +192,115 @@ def make_table(
     for row_index, row in enumerate(data_rows):
 
         row = row[:last_column + 1]
-    
+
+        # -----------------------------------------
         # Divider after the fourth starting pitcher.
+        # -----------------------------------------
+
         if (
             section_name == "Pitching"
             and row_index == 4
         ):
+
             html_output += """
-                    <tr class="section-divider">
-                        <td colspan="100%"></td>
-                    </tr>
+                <tr class="section-divider">
+                    <td colspan="100%"></td>
+                </tr>
             """
-      
+
+        # -----------------------------------------
+        # Detect the Team row.
+        # -----------------------------------------
+
         team_row = False
 
         if section_name == "Pitching":
-        
+
             for value in row:
-        
+
                 if value.strip() == "Team":
+
                     team_row = True
                     break
-        
-        if team_row:
-        
-            html_output += '<tr class="team-divider">'
-        
-        else:
-        
-            html_output += "<tr>"
-    
-        for column_index, value in enumerate(row):
 
-            # Column A contains player/team logos.
-            if column_index == 0:
-        
-                image_url = get_image_url(value)
-        
-                if image_url:
-        
-                    html_output += f"""
-                        <td class="logo-cell">
-                            <img
-                                src="{html_escape(image_url)}"
-                                class="player-logo"
-                                alt=""
-                            >
-                        </td>
-                    """
-        
-                else:
-        
-                    html_output += "<td></td>"
-        
-            else:
-        
-                html_output += (
-                    f"<td>{html_escape(value)}</td>"
-                )
-    
-        # Fill any missing cells.
-        missing = len(header) - len(row)
-    
+        # -----------------------------------------
+        # Start row.
+        # -----------------------------------------
+
+        if team_row:
+
+            html_output += (
+                '<tr class="team-divider">'
+            )
+
+        else:
+
+            html_output += "<tr>"
+
+        # -----------------------------------------
+        # Determine logo from Real Tm.
+        # -----------------------------------------
+
+        logo_url = ""
+
+        if (
+            real_team_column is not None
+            and len(row) > real_team_column
+        ):
+
+            real_team = row[
+                real_team_column
+            ].strip()
+
+            logo_url = logo_map.get(
+                real_team,
+                ""
+            )
+
+        # -----------------------------------------
+        # Logo column.
+        # -----------------------------------------
+
+        if logo_url:
+
+            html_output += f"""
+                <td class="logo-cell">
+                    <img
+                        src="{html_escape(logo_url)}"
+                        class="player-logo"
+                        alt=""
+                    >
+                </td>
+            """
+
+        else:
+
+            html_output += (
+                '<td class="logo-cell"></td>'
+            )
+
+        # -----------------------------------------
+        # Remaining spreadsheet columns.
+        # -----------------------------------------
+
+        for value in row[1:]:
+
+            html_output += (
+                f"<td>{html_escape(value)}</td>"
+            )
+
+        # Fill missing cells.
+        expected_cells = len(header) + 1
+        actual_cells = len(row) + 1
+
+        missing = (
+            expected_cells - actual_cells
+        )
+
         for _ in range(missing):
-    
+
             html_output += "<td></td>"
-    
+
         html_output += "</tr>"
 
     html_output += """
