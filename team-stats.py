@@ -278,8 +278,10 @@ def make_team_page(rows):
         line-height: 1.15;
     }
 
-    .team-stats-table th:first-child,
-    .team-stats-table td:first-child {
+    .team-stats-table th:nth-child(1),
+    .team-stats-table td:nth-child(1),
+    .team-stats-table th:nth-child(2),
+    .team-stats-table td:nth-child(2) {
         text-align: left;
     }
 
