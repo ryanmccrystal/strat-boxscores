@@ -61,7 +61,7 @@ def get_logo_map(spreadsheet):
     )
 
     rows = worksheet.get(
-        "A1:B500",
+        "A1:B1500",
         value_render_option="FORMULA"
     )
 
