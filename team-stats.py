@@ -37,6 +37,21 @@ def html_escape(value):
         quote=True
     )
 
+def get_image_url(value):
+
+    value = str(value).strip()
+
+    if not value.lower().startswith("=image("):
+        return ""
+
+    start = value.find('"')
+    end = value.rfind('"')
+
+    if start == -1 or end <= start:
+        return ""
+
+    return value[start + 1:end]
+
 
 def get_iowa_data(spreadsheet):
 
@@ -44,7 +59,10 @@ def get_iowa_data(spreadsheet):
         TEAM_TAB
     )
 
-    return worksheet.get_all_values()
+    return worksheet.get(
+        "A1:AH100",
+        value_render_option="FORMULA"
+    )
 
 
 def find_section_rows(rows):
@@ -183,11 +201,34 @@ def make_table(
         
             html_output += "<tr>"
     
-        for value in row:
-    
-            html_output += (
-                f"<td>{html_escape(value)}</td>"
-            )
+        for column_index, value in enumerate(row):
+
+            # Column A contains player/team logos.
+            if column_index == 0:
+        
+                image_url = get_image_url(value)
+        
+                if image_url:
+        
+                    html_output += f"""
+                        <td class="logo-cell">
+                            <img
+                                src="{html_escape(image_url)}"
+                                class="player-logo"
+                                alt=""
+                            >
+                        </td>
+                    """
+        
+                else:
+        
+                    html_output += "<td></td>"
+        
+            else:
+        
+                html_output += (
+                    f"<td>{html_escape(value)}</td>"
+                )
     
         # Fill any missing cells.
         missing = len(header) - len(row)
@@ -345,6 +386,20 @@ def make_team_page(rows):
 
     .team-stats-table tr.team-divider {
         border-top: 1px solid #222;
+    }
+
+    .logo-cell {
+        width: 28px;
+        padding-left: 2px !important;
+        padding-right: 2px !important;
+        text-align: center !important;
+    }
+    
+    .player-logo {
+        width: 18px;
+        height: 18px;
+        object-fit: contain;
+        vertical-align: middle;
     }
 
     @media (max-width: 900px) {
