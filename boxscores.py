@@ -1578,9 +1578,13 @@ def create_html(
 <div class="container">
 
 <h1>Strat-o-Matic Box Scores</h1>
+"""
 
-{make_standings_section(standings_rows)}
+html += make_standings_section(
+    standings_rows
+)
 
+html += """
 <div class="games-grid">
 """
 
