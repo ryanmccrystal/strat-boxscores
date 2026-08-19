@@ -1306,31 +1306,31 @@ def create_html(
         margin-bottom: 18px;
         max-width: 700px;
     }
-    
+
     .standings-table {
         width: 100%;
         border-collapse: collapse;
         table-layout: fixed;
         font-size: 13px;
     }
-    
+
     .standings-table th,
     .standings-table td {
         padding: 3px 5px;
         text-align: center;
         line-height: 1.1;
     }
-    
+
     .standings-table th {
         font-weight: 600;
         border-bottom: 1px solid #222;
     }
-    
+
     .standings-table .standings-team {
         width: 46%;
         text-align: left;
         font-weight: 600;
-    }   
+    }
 
     /* =========================
        GAME HEADER
@@ -1379,7 +1379,7 @@ def create_html(
         border-collapse: collapse;
         font-size: 14px;
     }
-    
+
     /* Player / pitcher name column */
     .batting-table th.player-column,
     .batting-table td.player-name,
@@ -1388,7 +1388,7 @@ def create_html(
         width: 46%;
         text-align: left;
     }
-    
+
     /* Six statistical columns */
     .batting-table th:not(.player-column),
     .batting-table td:not(.player-name),
@@ -1397,7 +1397,7 @@ def create_html(
         width: 9%;
         text-align: center;
     }
-    
+
     /* Headers */
     .batting-table th,
     .pitching-table th {
@@ -1407,19 +1407,19 @@ def create_html(
         padding: 2px 2px;
         line-height: 1.05;
     }
-    
+
     /* Player/pitcher rows */
     .batting-table td,
     .pitching-table td {
         padding: 2px 2px;
         line-height: 1.05;
     }
-    
+
     .batting-table td.player-name,
     .pitching-table td.pitcher-name {
         white-space: nowrap;
     }
-    
+
     /* Totals */
     .batting-table tr.totals {
         border-top: 1px solid #222;
@@ -1435,14 +1435,14 @@ def create_html(
     }
 
     /* =========================
-    LINESCORE
-    ========================= */
+       LINESCORE
+       ========================= */
 
     .linescore {
         margin-top: 4px;
         margin-bottom: 4px;
     }
-    
+
     .linescore-table {
         width: 100%;
         table-layout: fixed;
@@ -1451,27 +1451,33 @@ def create_html(
         border-top: 1px solid #222;
         border-bottom: 1px solid #222;
     }
-    
+
     .linescore-table td {
         padding: 2px 0px;
         text-align: center;
         line-height: 1.05;
     }
-    
+
     .linescore-table .linescore-team {
         width: 30%;
         text-align: left;
         font-weight: 700;
         padding-right: 4px;
     }
-    
+
     .linescore-table .inning-group-start {
         padding-left: 10px;
     }
-    
+
     .linescore-table .linescore-total {
         font-weight: 600;
         padding-left: 3px;
+    }
+
+    .linescore-table .linescore-separator {
+        width: 5%;
+        padding-left: 5px;
+        padding-right: 5px;
     }
 
     /* =========================
@@ -1580,66 +1586,67 @@ def create_html(
 <h1>Strat-o-Matic Box Scores</h1>
 """
 
-html += make_standings_section(
-    standings_rows
-)
+    # Add standings above the box scores.
+    html += make_standings_section(
+        standings_rows
+    )
 
-html += """
+    html += """
 <div class="games-grid">
 """
 
-# Calculate season-to-date batting note totals.
-get_note_season_totals(
-    games,
-    batting_by_game
-)
-
-# Tracks season-to-date pitching records.
-records = {}
-
-for game in games:
-
-    game_id = game["game_id"]
-
-    batting_rows = batting_by_game.get(
-        game_id,
-        []
+    # Calculate season-to-date batting note totals.
+    get_note_season_totals(
+        games,
+        batting_by_game
     )
 
-    pitching_rows = pitching_by_game.get(
-        game_id,
-        []
-    )
+    # Tracks season-to-date pitching records.
+    records = {}
 
-    linescore_rows = linescore_by_game.get(
-        game_id,
-        []
-    )
+    for game in games:
 
-    html += make_game_section(
-        game,
-        batting_rows,
-        pitching_rows,
-        records,
-        home_away_order,
-        linescore_rows
-    )
+        game_id = game["game_id"]
 
-    # Update pitcher records AFTER generating
-    # the current game's box score.
-    for pitcher in pitching_rows:
-
-        decision = get_pitcher_decision(
-            pitcher
+        batting_rows = batting_by_game.get(
+            game_id,
+            []
         )
 
-        if decision:
+        pitching_rows = pitching_by_game.get(
+            game_id,
+            []
+        )
 
-            update_pitcher_record(
-                records,
-                pitcher["pitcher"],
-                decision
+        linescore_rows = linescore_by_game.get(
+            game_id,
+            []
+        )
+
+        html += make_game_section(
+            game,
+            batting_rows,
+            pitching_rows,
+            records,
+            home_away_order,
+            linescore_rows
+        )
+
+        # Update pitcher records AFTER generating
+        # the current game's box score.
+        for pitcher in pitching_rows:
+
+            decision = get_pitcher_decision(
+                pitcher
             )
+
+            if decision:
+
+                update_pitcher_record(
+                    records,
+                    pitcher["pitcher"],
+                    decision
+                )
 
     html += """
 </div>
