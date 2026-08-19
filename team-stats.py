@@ -59,35 +59,7 @@ def get_iowa_data(spreadsheet):
         TEAM_TAB
     )
 
-    # Get the normal calculated/displayed values.
-    rows = worksheet.get_all_values()
-
-    # Get only Column A as formulas so we can retrieve
-    # the IMAGE() URLs used for the player/team logos.
-    logo_formulas = worksheet.get(
-        "A1:A100",
-        value_render_option="FORMULA"
-    )
-
-    # Put the Column A formulas into the otherwise-normal
-    # data rows.
-    for row_index, formula_row in enumerate(logo_formulas):
-
-        if row_index >= len(rows):
-            break
-
-        if not formula_row:
-            continue
-
-        formula = formula_row[0]
-
-        if (
-            isinstance(formula, str)
-            and formula.lower().startswith("=image(")
-        ):
-            rows[row_index][0] = formula
-
-    return rows
+    return worksheet.get_all_values()
 
 
 def find_section_rows(rows):
