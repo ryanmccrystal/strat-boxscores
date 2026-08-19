@@ -1317,7 +1317,7 @@ def create_html(
     }
     
     .linescore-table td {
-        padding: 2px 1px;
+        padding: 2px 0px;
         text-align: center;
         line-height: 1.05;
     }
@@ -1330,7 +1330,7 @@ def create_html(
     }
     
     .linescore-table .inning-group-start {
-        padding-left: 7px;
+        padding-left: 10px;
     }
     
     .linescore-table .linescore-total {
