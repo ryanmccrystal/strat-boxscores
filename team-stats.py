@@ -61,6 +61,50 @@ def get_iowa_data(spreadsheet):
 
     return worksheet.get_all_values()
 
+def get_logo_map(spreadsheet):
+
+    worksheet = spreadsheet.worksheet(
+        "Logos"
+    )
+
+    rows = worksheet.get(
+        "A1:B500",
+        value_render_option="FORMULA"
+    )
+
+    logo_map = {}
+
+    for row in rows:
+
+        if len(row) < 2:
+            continue
+
+        real_team = str(row[0]).strip()
+        image_formula = str(row[1]).strip()
+
+        if not real_team:
+            continue
+
+        if not image_formula.lower().startswith(
+            "=image("
+        ):
+            continue
+
+        start = image_formula.find('"')
+        end = image_formula.rfind('"')
+
+        if start == -1 or end <= start:
+            continue
+
+        logo_url = image_formula[
+            start + 1:end
+        ]
+
+        if logo_url:
+            logo_map[real_team] = logo_url
+
+    return logo_map
+
 
 def find_section_rows(rows):
 
