@@ -523,6 +523,26 @@ def main():
 
     spreadsheet = get_google_sheet()
 
+    logos = spreadsheet.worksheet("Logos")
+
+    logo_rows = logos.get(
+        "A1:B100",
+        value_render_option="FORMULA"
+    )
+
+    print("========== LOGOS ==========")
+
+    for row_number, row in enumerate(
+        logo_rows,
+        start=1
+    ):
+
+        print(
+            f"Row {row_number}: {row}"
+        )
+
+    print("===========================")
+
     rows = get_iowa_data(
         spreadsheet
     )
