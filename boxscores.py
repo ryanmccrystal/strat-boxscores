@@ -1641,17 +1641,16 @@ for game in games:
                 decision
             )
 
-html += """
+    html += """
 </div>
 
 </div>
 
 </body>
-
 </html>
 """
 
-return html
+    return html
 
 def main():
 
