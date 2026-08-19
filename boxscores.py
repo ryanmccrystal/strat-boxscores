@@ -1130,12 +1130,109 @@ def make_game_section(
 
     return html
 
+def get_standings_data(standings):
+    """
+    Read the standings table.
+
+    A = Team
+    B = Wins
+    C = Losses
+    D = Win Pct
+    E = Runs Scored
+    F = Runs Allowed
+    G = Run Diff
+
+    The spreadsheet is already sorted correctly, so
+    no sorting is performed here.
+    """
+
+    rows = standings.get_all_values()
+
+    standings_rows = []
+
+    for row in rows[1:]:
+
+        if len(row) < 7:
+            continue
+
+        team = row[0].strip()
+
+        if not team:
+            continue
+
+        standings_rows.append({
+            "team": team,
+            "W": row[1].strip(),
+            "L": row[2].strip(),
+            "PCT": row[3].strip(),
+            "RS": row[4].strip(),
+            "RA": row[5].strip(),
+            "DIFF": row[6].strip(),
+        })
+
+    return standings_rows
+
+def make_standings_section(standings_rows):
+
+    if not standings_rows:
+        return ""
+
+    html = """
+    <div class="standings-section">
+
+        <table class="standings-table">
+
+            <thead>
+                <tr>
+                    <th class="standings-team">Team</th>
+                    <th>W</th>
+                    <th>L</th>
+                    <th>PCT</th>
+                    <th>RS</th>
+                    <th>RA</th>
+                    <th>DIFF</th>
+                </tr>
+            </thead>
+
+            <tbody>
+    """
+
+    for row in standings_rows:
+
+        html += f"""
+                <tr>
+
+                    <td class="standings-team">
+                        {html_escape(row["team"])}
+                    </td>
+
+                    <td>{html_escape(row["W"])}</td>
+                    <td>{html_escape(row["L"])}</td>
+                    <td>{html_escape(row["PCT"])}</td>
+                    <td>{html_escape(row["RS"])}</td>
+                    <td>{html_escape(row["RA"])}</td>
+                    <td>{html_escape(row["DIFF"])}</td>
+
+                </tr>
+        """
+
+    html += """
+            </tbody>
+
+        </table>
+
+    </div>
+    """
+
+    return html
+
 def create_html(
     games,
     batting_by_game,
     pitching_by_game,
     home_away_order,
-    linescore_by_game
+    linescore_by_game,
+    standings_rows
 ):
 
     html = """<!DOCTYPE html>
@@ -1200,6 +1297,40 @@ def create_html(
         font-size: 12px;
         min-width: 0;
     }
+
+    /* =========================
+       STANDINGS
+       ========================= */
+
+    .standings-section {
+        margin-bottom: 18px;
+        max-width: 700px;
+    }
+    
+    .standings-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        font-size: 13px;
+    }
+    
+    .standings-table th,
+    .standings-table td {
+        padding: 3px 5px;
+        text-align: center;
+        line-height: 1.1;
+    }
+    
+    .standings-table th {
+        font-weight: 600;
+        border-bottom: 1px solid #222;
+    }
+    
+    .standings-table .standings-team {
+        width: 46%;
+        text-align: left;
+        font-weight: 600;
+    }   
 
     /* =========================
        GAME HEADER
@@ -1448,6 +1579,8 @@ def create_html(
 
 <h1>Strat-o-Matic Box Scores</h1>
 
+{make_standings_section(standings_rows)}
+
 <div class="games-grid">
 """
 
@@ -1549,12 +1682,17 @@ def main():
         linescore
     )
 
+    standings_rows = get_standings_data(
+        standings
+    )
+
     html = create_html(
         games,
         batting_by_game,
         pitching_by_game,
         home_away_order,
-        linescore_by_game
+        linescore_by_game,
+        standings_rows
     )
 
     with open(
