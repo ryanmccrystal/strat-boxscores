@@ -58,7 +58,7 @@ def get_games(standings):
 
     games = []
 
-    for row in rows[1:]:
+    for row in rows[1:7]:
 
         if len(row) < 17:
             continue
