@@ -161,11 +161,11 @@ def download_required_logos(
         if not logo_url:
 
             missing += 1
-
+        
             print(
-                f"No logo found for {real_team}"
+                f"NO LOGO FOUND: [{real_team}]"
             )
-
+        
             continue
 
         filename = make_logo_filename(
