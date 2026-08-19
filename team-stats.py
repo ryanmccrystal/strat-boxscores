@@ -304,6 +304,17 @@ def make_team_page(rows):
         line-height: 1.15;
     }
 
+    .team-stats-table tr.section-divider {
+        height: 0;
+    }
+    
+    .team-stats-table tr.section-divider td {
+        padding: 0;
+        height: 0;
+        line-height: 0;
+        border-bottom: 1px solid #222;
+    }
+
     .team-stats-table th:nth-child(1),
     .team-stats-table td:nth-child(1),
     .team-stats-table th:nth-child(2),
