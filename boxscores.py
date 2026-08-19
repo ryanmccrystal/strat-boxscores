@@ -1311,7 +1311,7 @@ def create_html(
         width: 100%;
         border-collapse: collapse;
         table-layout: fixed;
-        font-size: 13px;
+        font-size: 14px;
     }
 
     .standings-table th,
