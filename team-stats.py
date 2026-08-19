@@ -312,7 +312,10 @@ def make_table(
     return html_output
 
 
-def make_team_page(rows):
+def make_team_page(
+    rows,
+    logo_map
+):
 
     sections = find_section_rows(
         rows
@@ -569,7 +572,8 @@ def make_team_page(rows):
 
         html_output += make_table(
             section_rows,
-            section_name
+            section_name,
+            logo_map
         )
 
         html_output += """
@@ -615,7 +619,8 @@ def main():
     )
 
     html_output = make_team_page(
-        rows
+        rows,
+        logo_map
     )
 
     os.makedirs(
