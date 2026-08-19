@@ -165,15 +165,22 @@ def make_table(
                     </tr>
             """
       
-        team_row = (
-            section_name == "Pitching"
-            and row
-            and row[0].strip() == "Team"
-        )
-    
+        team_row = False
+
+        if section_name == "Pitching":
+        
+            for value in row:
+        
+                if value.strip() == "Team":
+                    team_row = True
+                    break
+        
         if team_row:
+        
             html_output += '<tr class="team-divider">'
+        
         else:
+        
             html_output += "<tr>"
     
         for value in row:
