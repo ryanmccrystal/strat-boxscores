@@ -104,7 +104,10 @@ def get_section_rows(
     return section
 
 
-def make_table(section_rows):
+def make_table(
+    section_rows,
+    section_name
+):
 
     if len(section_rows) < 2:
         return ""
@@ -147,25 +150,48 @@ def make_table(section_rows):
             <tbody>
     """
 
-    for row in data_rows:
+    for row_index, row in enumerate(data_rows):
 
         row = row[:last_column + 1]
-
+    
+        # Divider after the fourth starting pitcher.
+        if (
+            section_name == "Pitching"
+            and row_index == 4
+        ):
+            html_output += """
+                    <tr class="section-divider">
+                        <td colspan="100%"></td>
+                    </tr>
+            """
+    
+        # Divider immediately before the Team row.
+        if (
+            section_name == "Pitching"
+            and row
+            and row[0].strip() == "Team"
+        ):
+            html_output += """
+                    <tr class="section-divider">
+                        <td colspan="100%"></td>
+                    </tr>
+            """
+    
         html_output += "<tr>"
-
+    
         for value in row:
-
+    
             html_output += (
                 f"<td>{html_escape(value)}</td>"
             )
-
+    
         # Fill any missing cells.
         missing = len(header) - len(row)
-
+    
         for _ in range(missing):
-
+    
             html_output += "<td></td>"
-
+    
         html_output += "</tr>"
 
     html_output += """
@@ -298,6 +324,10 @@ def make_team_page(rows):
         background: #f5f5f5;
     }
 
+    .team-stats-table tr.section-divider {
+        border-bottom: 1px solid #222;
+    }
+
     @media (max-width: 900px) {
 
         body {
@@ -400,7 +430,8 @@ def make_team_page(rows):
     """
 
         html_output += make_table(
-            section_rows
+            section_rows,
+            section_name
         )
 
         html_output += """
