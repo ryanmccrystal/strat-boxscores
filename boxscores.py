@@ -58,7 +58,7 @@ def get_games(standings):
 
     games = []
 
-    for row in rows[1:7]:
+    for row in rows[1:]:
 
         if len(row) < 17:
             continue
@@ -1150,7 +1150,7 @@ def get_standings_data(standings):
 
     standings_rows = []
 
-    for row in rows[1:]:
+    for row in rows[1:7]:
 
         if len(row) < 7:
             continue
