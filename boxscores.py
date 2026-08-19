@@ -1651,7 +1651,7 @@ html += """
 </html>
 """
 
-    return html
+return html
 
 def main():
 
