@@ -1286,6 +1286,7 @@ def create_html(
     /* Totals */
     .batting-table tr.totals {
         border-top: 1px solid #222;
+        border-bottom: 1px solid #222;
         font-weight: 700;
     }
 
