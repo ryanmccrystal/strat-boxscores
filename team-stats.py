@@ -164,26 +164,17 @@ def make_table(
                         <td colspan="100%"></td>
                     </tr>
             """
+      
+        team_row = (
+            section_name == "Pitching"
+            and row
+            and row[0].strip() == "Team"
+        )
     
-            # Divider immediately before the Team row.
-            if section_name == "Pitching":
-        
-                first_value = ""
-        
-                for value in row:
-                    if value.strip():
-                        first_value = value.strip()
-                        break
-        
-                if first_value == "Team":
-        
-                    html_output += """
-                        <tr class="section-divider">
-                            <td colspan="100%"></td>
-                        </tr>
-                    """
-    
-        html_output += "<tr>"
+        if team_row:
+            html_output += '<tr class="team-divider">'
+        else:
+            html_output += "<tr>"
     
         for value in row:
     
@@ -343,6 +334,10 @@ def make_team_page(rows):
 
     .team-stats-table tr.section-divider {
         border-bottom: 1px solid #222;
+    }
+
+    .team-stats-table tr.team-divider {
+        border-top: 1px solid #222;
     }
 
     @media (max-width: 900px) {
