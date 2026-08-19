@@ -1267,6 +1267,7 @@ def create_html(
     .pitching-table th {
         font-weight: 600;
         border-bottom: 1px solid #222;
+        border-top: 1px solid #222;
         padding: 2px 2px;
         line-height: 1.05;
     }
@@ -1286,7 +1287,6 @@ def create_html(
     /* Totals */
     .batting-table tr.totals {
         border-top: 1px solid #222;
-        border-bottom: 1px solid #222;
         font-weight: 700;
     }
 
