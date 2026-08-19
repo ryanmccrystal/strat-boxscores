@@ -1,6 +1,9 @@
 import os
 import json
 import html
+import re
+import urllib.request
+
 import gspread
 from google.oauth2.service_account import Credentials
 
@@ -8,6 +11,8 @@ from google.oauth2.service_account import Credentials
 SPREADSHEET_ID = "1hPnUsWFFjbFQZPrqc2F4X9f4ytjP2zb9sdhp8T0gjN0"
 
 TEAM_TAB = "Iowa"
+
+LOGO_DIRECTORY = "logos"
 
 
 def get_google_sheet():
@@ -27,7 +32,9 @@ def get_google_sheet():
 
     client = gspread.authorize(credentials)
 
-    return client.open_by_key(SPREADSHEET_ID)
+    return client.open_by_key(
+        SPREADSHEET_ID
+    )
 
 
 def html_escape(value):
@@ -37,21 +44,6 @@ def html_escape(value):
         quote=True
     )
 
-def get_image_url(value):
-
-    value = str(value).strip()
-
-    if not value.lower().startswith("=image("):
-        return ""
-
-    start = value.find('"')
-    end = value.rfind('"')
-
-    if start == -1 or end <= start:
-        return ""
-
-    return value[start + 1:end]
-
 
 def get_iowa_data(spreadsheet):
 
@@ -60,6 +52,7 @@ def get_iowa_data(spreadsheet):
     )
 
     return worksheet.get_all_values()
+
 
 def get_logo_map(spreadsheet):
 
@@ -79,8 +72,13 @@ def get_logo_map(spreadsheet):
         if len(row) < 2:
             continue
 
-        real_team = str(row[0]).strip()
-        image_formula = str(row[1]).strip()
+        real_team = str(
+            row[0]
+        ).strip()
+
+        image_formula = str(
+            row[1]
+        ).strip()
 
         if not real_team:
             continue
@@ -101,9 +99,137 @@ def get_logo_map(spreadsheet):
         ]
 
         if logo_url:
+
             logo_map[real_team] = logo_url
 
     return logo_map
+
+
+def make_logo_filename(real_team):
+
+    filename = real_team.lower()
+
+    filename = re.sub(
+        r"[^a-z0-9]+",
+        "-",
+        filename
+    )
+
+    filename = filename.strip("-")
+
+    return filename + ".gif"
+
+
+def download_required_logos(
+    logo_map,
+    rows
+):
+
+    os.makedirs(
+        LOGO_DIRECTORY,
+        exist_ok=True
+    )
+
+    # Find all Real Tm values that actually
+    # appear in the Iowa spreadsheet.
+    required_teams = set()
+
+    for row in rows:
+
+        if len(row) <= 2:
+            continue
+
+        real_team = row[2].strip()
+
+        if real_team:
+            required_teams.add(
+                real_team
+            )
+
+    downloaded = 0
+    already_exists = 0
+    missing = 0
+
+    for real_team in sorted(
+        required_teams
+    ):
+
+        logo_url = logo_map.get(
+            real_team
+        )
+
+        if not logo_url:
+
+            missing += 1
+
+            print(
+                f"No logo found for {real_team}"
+            )
+
+            continue
+
+        filename = make_logo_filename(
+            real_team
+        )
+
+        local_path = os.path.join(
+            LOGO_DIRECTORY,
+            filename
+        )
+
+        if os.path.exists(
+            local_path
+        ):
+
+            already_exists += 1
+
+            continue
+
+        try:
+
+            print(
+                f"Downloading logo: {real_team}"
+            )
+
+            request = urllib.request.Request(
+                logo_url,
+                headers={
+                    "User-Agent":
+                        "Mozilla/5.0"
+                }
+            )
+
+            with urllib.request.urlopen(
+                request,
+                timeout=15
+            ) as response:
+
+                image_data = response.read()
+
+            with open(
+                local_path,
+                "wb"
+            ) as file:
+
+                file.write(
+                    image_data
+                )
+
+            downloaded += 1
+
+        except Exception as error:
+
+            print(
+                f"Could not download logo "
+                f"for {real_team}: {error}"
+            )
+
+    print(
+        "Logo summary: "
+        f"{downloaded} downloaded, "
+        f"{already_exists} already existed, "
+        f"{missing} missing."
+    )
 
 
 def find_section_rows(rows):
@@ -118,15 +244,19 @@ def find_section_rows(rows):
         ]
 
         if "Pitching" in values:
+
             sections["Pitching"] = index
 
         elif "Batting" in values:
+
             sections["Batting"] = index
 
         elif "Catching" in values:
+
             sections["Catching"] = index
 
         elif "Fielding" in values:
+
             sections["Fielding"] = index
 
     return sections
@@ -141,23 +271,27 @@ def get_section_rows(
     start = section_start + 1
 
     if next_section_start is not None:
+
         end = next_section_start
+
     else:
+
         end = len(rows)
 
     section = rows[start:end]
 
-    # Remove completely blank rows at the beginning/end.
     while section and not any(
         cell.strip()
         for cell in section[0]
     ):
+
         section.pop(0)
 
     while section and not any(
         cell.strip()
         for cell in section[-1]
     ):
+
         section.pop()
 
     return section
@@ -165,18 +299,18 @@ def get_section_rows(
 
 def make_table(
     section_rows,
-    section_name,
-    logo_map
+    section_name
 ):
 
     if len(section_rows) < 2:
+
         return ""
 
     header = section_rows[0]
 
     data_rows = section_rows[1:]
 
-    # Find the actual last used column.
+    # Find the final used column.
     last_column = 0
 
     for row in section_rows:
@@ -190,14 +324,18 @@ def make_table(
                     index
                 )
 
-    header = header[:last_column + 1]
+    header = header[
+        :last_column + 1
+    ]
 
     # Find the Real Tm / Tm-Yr column.
     real_team_column = None
 
     for index, value in enumerate(header):
 
-        header_value = value.strip().lower()
+        header_value = (
+            value.strip().lower()
+        )
 
         if header_value in (
             "real tm",
@@ -206,21 +344,23 @@ def make_table(
         ):
 
             real_team_column = index
+
             break
 
     html_output = """
     <div class="table-wrapper">
-        <table class="team-stats-table">
-            <thead>
-                <tr>
-    """
 
-    # Logo column.
-    html_output += """
+        <table class="team-stats-table">
+
+            <thead>
+
+                <tr>
+
                     <th class="logo-header"></th>
     """
 
-    # Spreadsheet headers.
+    # Skip spreadsheet Column A because
+    # that column is reserved for the logo.
     for value in header[1:]:
 
         html_output += (
@@ -229,13 +369,19 @@ def make_table(
 
     html_output += """
                 </tr>
+
             </thead>
+
             <tbody>
     """
 
-    for row_index, row in enumerate(data_rows):
+    for row_index, row in enumerate(
+        data_rows
+    ):
 
-        row = row[:last_column + 1]
+        row = row[
+            :last_column + 1
+        ]
 
         # -----------------------------------------
         # Divider after the fourth starting pitcher.
@@ -253,7 +399,7 @@ def make_table(
             """
 
         # -----------------------------------------
-        # Detect the Team row.
+        # Detect Team row.
         # -----------------------------------------
 
         team_row = False
@@ -265,11 +411,8 @@ def make_table(
                 if value.strip() == "Team":
 
                     team_row = True
-                    break
 
-        # -----------------------------------------
-        # Start row.
-        # -----------------------------------------
+                    break
 
         if team_row:
 
@@ -282,10 +425,10 @@ def make_table(
             html_output += "<tr>"
 
         # -----------------------------------------
-        # Determine logo from Real Tm.
+        # Determine the local logo.
         # -----------------------------------------
 
-        logo_url = ""
+        logo_filename = ""
 
         if (
             real_team_column is not None
@@ -296,24 +439,42 @@ def make_table(
                 real_team_column
             ].strip()
 
-            logo_url = logo_map.get(
-                real_team,
-                ""
-            )
+            if real_team:
+
+                possible_filename = (
+                    make_logo_filename(
+                        real_team
+                    )
+                )
+
+                possible_path = os.path.join(
+                    LOGO_DIRECTORY,
+                    possible_filename
+                )
+
+                if os.path.exists(
+                    possible_path
+                ):
+
+                    logo_filename = (
+                        possible_filename
+                    )
 
         # -----------------------------------------
-        # Logo column.
+        # Logo cell.
         # -----------------------------------------
 
-        if logo_url:
+        if logo_filename:
 
             html_output += f"""
                 <td class="logo-cell">
+
                     <img
-                        src="{html_escape(logo_url)}"
+                        src="../logos/{html_escape(logo_filename)}"
                         class="player-logo"
                         alt=""
                     >
+
                 </td>
             """
 
@@ -324,7 +485,7 @@ def make_table(
             )
 
         # -----------------------------------------
-        # Remaining spreadsheet columns.
+        # Spreadsheet data.
         # -----------------------------------------
 
         for value in row[1:]:
@@ -334,11 +495,17 @@ def make_table(
             )
 
         # Fill missing cells.
-        expected_cells = len(header) + 1
-        actual_cells = len(row) + 1
+        expected_cells = (
+            len(header) + 1
+        )
+
+        actual_cells = (
+            len(row) + 1
+        )
 
         missing = (
-            expected_cells - actual_cells
+            expected_cells
+            - actual_cells
         )
 
         for _ in range(missing):
@@ -349,17 +516,16 @@ def make_table(
 
     html_output += """
             </tbody>
+
         </table>
+
     </div>
     """
 
     return html_output
 
 
-def make_team_page(
-    rows,
-    logo_map
-):
+def make_team_page(rows):
 
     sections = find_section_rows(
         rows
@@ -367,6 +533,7 @@ def make_team_page(
 
     html_output = """
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
@@ -382,14 +549,18 @@ def make_team_page(
       href="https://fonts.googleapis.com">
 
 <link rel="preconnect"
-      href="https://fonts.gstatic.com" crossorigin>
+      href="https://fonts.gstatic.com"
+      crossorigin>
 
-<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap"
-      rel="stylesheet">
+<link
+    href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap"
+    rel="stylesheet"
+>
 
 <style>
 
     body {
+
         font-family:
             "Source Sans 3",
             Arial,
@@ -397,140 +568,268 @@ def make_team_page(
             sans-serif;
 
         background: #ffffff;
+
         color: #111111;
 
         margin: 0;
+
         padding: 25px;
     }
 
+
     .container {
+
         width: 100%;
+
         margin: 0 auto;
     }
 
+
+    /* =========================
+       TEAM HEADER
+       ========================= */
+
     .team-header {
+
         margin-bottom: 25px;
     }
 
+
     .team-name {
+
         font-size: 32px;
+
         font-weight: 700;
+
         margin: 0 0 3px 0;
     }
 
+
     .team-record {
+
         font-size: 18px;
+
         margin-bottom: 2px;
     }
 
+
     .team-manager {
+
         font-size: 16px;
+
         color: #555555;
     }
 
+
+    /* =========================
+       SECTIONS
+       ========================= */
+
     .stats-section {
+
         margin-bottom: 28px;
     }
 
+
     .stats-section h2 {
+
         font-size: 20px;
+
         font-weight: 700;
+
         margin: 0 0 6px 0;
+
         border-bottom: 1px solid #222;
+
         padding-bottom: 3px;
     }
 
+
+    /* =========================
+       TABLE
+       ========================= */
+
     .table-wrapper {
+
         width: 100%;
+
         overflow-x: auto;
     }
 
+
     .team-stats-table {
+
         width: 100%;
+
         border-collapse: collapse;
+
         table-layout: auto;
+
         font-size: 14px;
+
         white-space: nowrap;
     }
 
+
     .team-stats-table th,
     .team-stats-table td {
+
         padding: 4px 7px;
+
         text-align: center;
+
         line-height: 1.15;
     }
 
-    .team-stats-table tr.section-divider {
-        height: 0;
-    }
-    
-    .team-stats-table tr.section-divider td {
-        padding: 0;
-        height: 0;
-        line-height: 0;
-        border-bottom: 1px solid #222;
+
+    /* =========================
+       LOGOS
+       ========================= */
+
+    .team-stats-table
+    th.logo-header,
+    .team-stats-table
+    td.logo-cell {
+
+        width: 28px;
+
+        padding-left: 2px;
+
+        padding-right: 2px;
+
+        text-align: center;
     }
 
-    .team-stats-table th:nth-child(1),
-    .team-stats-table td:nth-child(1),
-    .team-stats-table th:nth-child(2),
-    .team-stats-table td:nth-child(2) {
+
+    .player-logo {
+
+        width: 18px;
+
+        height: 18px;
+
+        object-fit: contain;
+
+        vertical-align: middle;
+    }
+
+
+    /* =========================
+       FIRST TWO TEXT COLUMNS
+       ========================= */
+
+    .team-stats-table
+    th:nth-child(2),
+    .team-stats-table
+    td:nth-child(2) {
+
         text-align: left;
     }
 
+
+    .team-stats-table
+    th:nth-child(3),
+    .team-stats-table
+    td:nth-child(3) {
+
+        text-align: left;
+    }
+
+
     .team-stats-table th {
+
         font-weight: 600;
+
         border-bottom: 1px solid #222;
     }
 
-    .team-stats-table tbody tr:last-child {
+
+    /* =========================
+       PITCHING DIVIDERS
+       ========================= */
+
+    .team-stats-table
+    tr.section-divider {
+
+        height: 0;
+    }
+
+
+    .team-stats-table
+    tr.section-divider td {
+
+        padding: 0;
+
+        height: 0;
+
+        line-height: 0;
+
         border-bottom: 1px solid #222;
     }
 
-    .team-stats-table tbody tr:hover {
-        background: #f5f5f5;
-    }
 
-    .team-stats-table tr.section-divider {
-        border-bottom: 1px solid #222;
-    }
+    .team-stats-table
+    tr.team-divider {
 
-    .team-stats-table tr.team-divider {
         border-top: 1px solid #222;
     }
 
-    .logo-cell {
-        width: 28px;
-        padding-left: 2px !important;
-        padding-right: 2px !important;
-        text-align: center !important;
+
+    .team-stats-table
+    tbody tr:last-child {
+
+        border-bottom: 1px solid #222;
     }
-    
-    .player-logo {
-        width: 18px;
-        height: 18px;
-        object-fit: contain;
-        vertical-align: middle;
+
+
+    /* =========================
+       HOVER
+       ========================= */
+
+    .team-stats-table
+    tbody tr:hover {
+
+        background: #f5f5f5;
     }
+
+
+    /* =========================
+       MOBILE
+       ========================= */
 
     @media (max-width: 900px) {
 
         body {
+
             padding: 15px;
         }
 
+
         .team-name {
+
             font-size: 28px;
         }
 
+
         .team-stats-table {
+
             font-size: 13px;
         }
 
+
         .team-stats-table th,
         .team-stats-table td {
+
             padding: 3px 5px;
         }
+
+
+        .player-logo {
+
+            width: 17px;
+
+            height: 17px;
+        }
+
     }
 
 </style>
@@ -542,63 +841,88 @@ def make_team_page(
 <div class="container">
 """
 
+    # -----------------------------------------
     # Team header
+    # -----------------------------------------
+
     team_name = ""
 
     if rows and len(rows[0]) > 2:
+
         team_name = rows[0][2].strip()
+
 
     record = ""
 
     if len(rows) > 1 and len(rows[1]) > 2:
+
         record = rows[1][2].strip()
+
 
     manager = ""
 
     if len(rows) > 1 and len(rows[1]) > 3:
+
         manager = rows[1][3].strip()
+
 
     html_output += f"""
     <div class="team-header">
 
         <div class="team-name">
+
             {html_escape(team_name)}
+
         </div>
 
         <div class="team-record">
+
             {html_escape(record)}
+
         </div>
 
         <div class="team-manager">
+
             {html_escape(manager)}
+
         </div>
 
     </div>
     """
 
-    # Sort sections according to their appearance
-    # in the spreadsheet.
+
+    # -----------------------------------------
+    # Sections in spreadsheet order
+    # -----------------------------------------
+
     ordered_sections = sorted(
         sections.items(),
         key=lambda item: item[1]
     )
 
+
     for section_index, (
         section_name,
         start
-    ) in enumerate(ordered_sections):
+    ) in enumerate(
+        ordered_sections
+    ):
 
-        if section_index + 1 < len(
-            ordered_sections
+        if (
+            section_index + 1
+            < len(ordered_sections)
         ):
 
-            next_start = ordered_sections[
-                section_index + 1
-            ][1]
+            next_start = (
+                ordered_sections[
+                    section_index + 1
+                ][1]
+            )
 
         else:
 
             next_start = None
+
 
         section_rows = get_section_rows(
             rows,
@@ -606,30 +930,37 @@ def make_team_page(
             next_start
         )
 
+
         html_output += f"""
     <section class="stats-section">
 
         <h2>
+
             {html_escape(section_name)}
+
         </h2>
     """
 
+
         html_output += make_table(
             section_rows,
-            section_name,
-            logo_map
+            section_name
         )
+
 
         html_output += """
     </section>
     """
 
+
     html_output += """
 </div>
 
 </body>
+
 </html>
 """
+
 
     return html_output
 
@@ -643,15 +974,21 @@ def main():
         spreadsheet
     )
 
-    # Get the Real Tm -> logo URL lookup.
+    # Get Real Tm -> external logo URL.
     logo_map = get_logo_map(
         spreadsheet
     )
 
+    # Download only the logos actually
+    # needed by the Iowa page.
+    download_required_logos(
+        logo_map,
+        rows
+    )
+
     # Generate the Iowa page.
     html_output = make_team_page(
-        rows,
-        logo_map
+        rows
     )
 
     # Make sure the teams directory exists.
@@ -660,7 +997,7 @@ def main():
         exist_ok=True
     )
 
-    # Write Iowa's page.
+    # Write the page.
     with open(
         "teams/iowa.html",
         "w",
