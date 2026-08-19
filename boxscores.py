@@ -929,6 +929,11 @@ def make_linescore_section(
 
             html += f"{html_escape(value)}</td>"
 
+        # Separator between innings and R/H/E
+        html += """
+                    <td class="linescore-separator">—</td>
+        """
+
         html += f"""
                     <td class="linescore-total">
                         {html_escape(row["R"])}
