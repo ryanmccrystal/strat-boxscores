@@ -28,6 +28,7 @@ jobs:
         env:
           GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
         run: python boxscores.py
+        run: python team-stats.py
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
