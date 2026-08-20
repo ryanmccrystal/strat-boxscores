@@ -701,7 +701,7 @@ def make_team_page(rows):
     
     .team-stats-table th:nth-child(n+4),
     .team-stats-table td:nth-child(n+4) {
-        min-width: 42px;
+        min-width: 35px;
     }
 
     .team-stats-table th,
