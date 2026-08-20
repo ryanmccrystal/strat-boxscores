@@ -963,6 +963,15 @@ def make_team_page(rows):
         )
 
 
+        # Open the two-column layout immediately
+        # before Catching.
+        if section_name == "Catching":
+
+            html_output += """
+    <div class="small-stats-row">
+    """
+
+
         html_output += f"""
     <section class="stats-section">
 
@@ -982,6 +991,15 @@ def make_team_page(rows):
 
         html_output += """
     </section>
+    """
+
+
+        # Close the two-column layout immediately
+        # after Fielding.
+        if section_name == "Fielding":
+
+            html_output += """
+    </div>
     """
 
 
