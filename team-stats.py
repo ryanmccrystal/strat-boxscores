@@ -685,16 +685,29 @@ def make_team_page(rows):
 
 
     .team-stats-table {
-
         width: 100%;
-
         border-collapse: collapse;
-
-        table-layout: auto;
-
+        table-layout: fixed;
         font-size: 14px;
-
         white-space: nowrap;
+    }
+
+    /* Logo column */
+    .team-stats-table th:nth-child(1),
+    .team-stats-table td:nth-child(1) {
+        width: 28px;
+    }
+    
+    /* Player name */
+    .team-stats-table th:nth-child(2),
+    .team-stats-table td:nth-child(2) {
+        width: 150px;
+    }
+    
+    /* Real Tm / Tm-Yr */
+    .team-stats-table th:nth-child(3),
+    .team-stats-table td:nth-child(3) {
+        width: 80px;
     }
 
 
