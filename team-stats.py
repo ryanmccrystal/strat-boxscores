@@ -648,10 +648,6 @@ def make_team_page(
         color: #555555;
     }
 
-    .fraction {
-        font-size: 0.98em;
-    }
-
 
     /* =========================
        SECTIONS
@@ -660,17 +656,6 @@ def make_team_page(
     .stats-section {
 
         margin-bottom: 28px;
-    }
-
-    .small-stats-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 30px;
-        align-items: start;
-    }
-    
-    .small-stats-row .stats-section {
-        min-width: 0;
     }
 
 
@@ -689,6 +674,29 @@ def make_team_page(
 
 
     /* =========================
+       CATCHING / FIELDING
+       ========================= */
+
+    .small-stats-row {
+
+        display: grid;
+
+        grid-template-columns: 1fr 1fr;
+
+        gap: 30px;
+
+        align-items: start;
+    }
+
+
+    .small-stats-row
+    .stats-section {
+
+        min-width: 0;
+    }
+
+
+    /* =========================
        TABLE
        ========================= */
 
@@ -701,24 +709,18 @@ def make_team_page(
 
 
     .team-stats-table {
+
         width: 100%;
+
         border-collapse: collapse;
+
         table-layout: auto;
+
         font-size: 14px;
+
         white-space: nowrap;
     }
 
-    .team-stats-table th,
-    .team-stats-table td {
-        padding: 4px 7px;
-        text-align: center;
-        line-height: 1.15;
-    }
-    
-    .team-stats-table th:nth-child(n+4),
-    .team-stats-table td:nth-child(n+4) {
-        min-width: 35px;
-    }
 
     .team-stats-table th,
     .team-stats-table td {
@@ -763,6 +765,18 @@ def make_team_page(
 
 
     /* =========================
+       FRACTIONS
+       ========================= */
+
+    .fraction {
+
+        font-size: 0.90em;
+
+        vertical-align: 0.08em;
+    }
+
+
+    /* =========================
        FIRST TWO TEXT COLUMNS
        ========================= */
 
@@ -793,7 +807,7 @@ def make_team_page(
 
 
     /* =========================
-       PITCHING DIVIDERS
+       PITCHING / BATTING DIVIDERS
        ========================= */
 
     .team-stats-table
@@ -813,13 +827,6 @@ def make_team_page(
         line-height: 0;
 
         border-bottom: 1px solid #222;
-    }
-
-
-    .team-stats-table
-    tr.team-divider {
-
-        border-top: 1px solid #222;
     }
 
 
@@ -874,9 +881,17 @@ def make_team_page(
 
         .player-logo {
 
-            width: 17px;
+            width: 25px;
 
-            height: 17px;
+            height: 25px;
+        }
+
+
+        .small-stats-row {
+
+            grid-template-columns: 1fr;
+
+            gap: 20px;
         }
 
     }
@@ -889,6 +904,7 @@ def make_team_page(
 
 <div class="container">
 """
+
 
     # -----------------------------------------
     # Team header
@@ -937,11 +953,12 @@ def make_team_page(
         </div>
 
     </div>
-    """
+"""
 
 
     # -----------------------------------------
     # Sections in spreadsheet order
+    # Catching and Fielding appear side-by-side.
     # -----------------------------------------
 
     ordered_sections = sorted(
@@ -980,24 +997,22 @@ def make_team_page(
         )
 
 
-        # Open the two-column layout immediately
-        # before Catching.
+        # Open the two-column layout
+        # immediately before Catching.
         if section_name == "Catching":
 
             html_output += """
     <div class="small-stats-row">
-    """
+"""
 
 
         html_output += f"""
     <section class="stats-section">
 
         <h2>
-
             {html_escape(section_name)}
-
         </h2>
-    """
+"""
 
 
         html_output += make_table(
@@ -1008,16 +1023,16 @@ def make_team_page(
 
         html_output += """
     </section>
-    """
+"""
 
 
-        # Close the two-column layout immediately
-        # after Fielding.
+        # Close the two-column layout
+        # immediately after Fielding.
         if section_name == "Fielding":
 
             html_output += """
     </div>
-    """
+"""
 
 
     html_output += """
