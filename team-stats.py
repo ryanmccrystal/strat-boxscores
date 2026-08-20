@@ -386,18 +386,35 @@ def make_table(
         # -----------------------------------------
         # Divider after the fourth starting pitcher.
         # -----------------------------------------
-
+        
         if (
             section_name == "Pitching"
             and row_index == 4
         ):
-
+        
             html_output += """
                 <tr class="section-divider">
                     <td colspan="100%"></td>
                 </tr>
             """
-
+        
+        
+        # -----------------------------------------
+        # Divider before Pitching Team row.
+        # -----------------------------------------
+        
+        if (
+            section_name == "Pitching"
+            and row_index == 10
+        ):
+        
+            html_output += """
+                <tr class="section-divider">
+                    <td colspan="100%"></td>
+                </tr>
+            """
+        
+        
         # -----------------------------------------
         # Divider before Batting Team Totals.
         # There are always nine individual batters.
@@ -413,6 +430,9 @@ def make_table(
                     <td colspan="100%"></td>
                 </tr>
             """
+        
+        
+        html_output += "<tr>"
 
         # -----------------------------------------
         # Determine the local logo.
