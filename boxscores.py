@@ -1199,11 +1199,23 @@ def make_standings_section(standings_rows):
 
     for row in standings_rows:
 
+        team_name = row["team"].strip()
+
+        # Convert the team name to the same filename
+        # used by team-stats.py.
+        team_slug = re.sub(
+            r"[^a-z0-9]+",
+            "-",
+            team_name.lower()
+        ).strip("-")
+
         html += f"""
                 <tr>
 
                     <td class="standings-team">
-                        {html_escape(row["team"])}
+                        <a href="teams/{team_slug}.html">
+                            {html_escape(team_name)}
+                        </a>
                     </td>
 
                     <td>{html_escape(row["W"])}</td>
@@ -1330,6 +1342,15 @@ def create_html(
         width: 46%;
         text-align: left;
         font-weight: 600;
+    }
+
+    .standings-table .standings-team a {
+        color: inherit;
+        text-decoration: none;
+    }
+    
+    .standings-table .standings-team a:hover {
+        text-decoration: underline;
     }
 
     /* =========================
