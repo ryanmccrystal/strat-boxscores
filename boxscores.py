@@ -1177,6 +1177,16 @@ def make_standings_section(standings_rows):
     if not standings_rows:
         return ""
 
+    # Full team name -> city name used for team page.
+    team_page_names = {
+        "Portland Beavers": "Portland",
+        "Iowa Cubs": "Iowa",
+        "Pawtucket Red Sox": "Pawtucket",
+        "Richmond Braves": "Richmond",
+        "Omaha Royals": "Omaha",
+        "Dunedin Blue Jays": "Dunedin",
+    }
+
     html = """
     <div class="standings-section">
 
@@ -1201,12 +1211,17 @@ def make_standings_section(standings_rows):
 
         team_name = row["team"].strip()
 
-        # Convert the team name to the same filename
-        # used by team-stats.py.
+        # Get the city name used by the team page.
+        page_name = team_page_names.get(
+            team_name,
+            team_name
+        )
+
+        # Convert the city name to the filename.
         team_slug = re.sub(
             r"[^a-z0-9]+",
             "-",
-            team_name.lower()
+            page_name.lower()
         ).strip("-")
 
         html += f"""
