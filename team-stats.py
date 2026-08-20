@@ -399,30 +399,20 @@ def make_table(
             """
 
         # -----------------------------------------
-        # Detect Team row.
+        # Divider before Batting Team Totals.
+        # There are always nine individual batters.
         # -----------------------------------------
-
-        team_row = False
-
-        if section_name == "Pitching":
-
-            for value in row:
-
-                if value.strip() == "Team":
-
-                    team_row = True
-
-                    break
-
-        if team_row:
-
-            html_output += (
-                '<tr class="team-divider">'
-            )
-
-        else:
-
-            html_output += "<tr>"
+        
+        if (
+            section_name == "Batting"
+            and row_index == 9
+        ):
+        
+            html_output += """
+                <tr class="section-divider">
+                    <td colspan="100%"></td>
+                </tr>
+            """
 
         # -----------------------------------------
         # Determine the local logo.
