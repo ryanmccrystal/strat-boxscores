@@ -498,34 +498,19 @@ def make_table(
         # Spreadsheet data.
         # -----------------------------------------
 
-        for column_index, value in enumerate(row[1:], start=1):
+        for value in row[1:]:
 
             display_value = html_escape(value)
         
-            # Shrink the fractional portion of IP.
-            if (
-                section_name == "Pitching"
-                and real_team_column is not None
-                and column_index == real_team_column + 1
-            ):
+            display_value = display_value.replace(
+                " 1/3",
+                '<span class="fraction">¹⁄₃</span>'
+            )
         
-                if " 1/3" in value:
-        
-                    display_value = (
-                        html_escape(
-                            value.split(" 1/3")[0]
-                        )
-                        + '<span class="ip-fraction">¹⁄₃</span>'
-                    )
-        
-                elif " 2/3" in value:
-        
-                    display_value = (
-                        html_escape(
-                            value.split(" 2/3")[0]
-                        )
-                        + '<span class="ip-fraction">²⁄₃</span>'
-                    )
+            display_value = display_value.replace(
+                " 2/3",
+                '<span class="fraction">²⁄₃</span>'
+            )
         
             html_output += (
                 f"<td>{display_value}</td>"
@@ -657,7 +642,7 @@ def make_team_page(rows):
         color: #555555;
     }
 
-    .ip-fraction {
+    .fraction {
         font-size: 0.72em;
         vertical-align: 0.12em;
     }
