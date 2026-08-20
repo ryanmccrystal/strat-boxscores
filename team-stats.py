@@ -45,10 +45,13 @@ def html_escape(value):
     )
 
 
-def get_iowa_data(spreadsheet):
+def get_team_data(
+    spreadsheet,
+    team_tab
+):
 
     worksheet = spreadsheet.worksheet(
-        TEAM_TAB
+        team_tab
     )
 
     return worksheet.get_all_values()
@@ -547,13 +550,16 @@ def make_table(
     return html_output
 
 
-def make_team_page(rows):
+def make_team_page(
+    rows,
+    team_tab
+):
 
     sections = find_section_rows(
         rows
     )
 
-    html_output = """
+    html_output = f"""
 <!DOCTYPE html>
 
 <html lang="en">
@@ -565,7 +571,7 @@ def make_team_page(rows):
 <meta name="viewport"
       content="width=device-width, initial-scale=1.0">
 
-<title>Iowa Cubs - Strat-o-Matic</title>
+<title>{html_escape(team_tab)} - Strat-o-Matic</title>
 
 <link rel="preconnect"
       href="https://fonts.googleapis.com">
@@ -1030,48 +1036,66 @@ def main():
 
     spreadsheet = get_google_sheet()
 
-    # Get Iowa statistics.
-    rows = get_iowa_data(
-        spreadsheet
-    )
-
-    # Get Real Tm -> external logo URL.
+    # Get the shared Real Tm -> logo URL map.
     logo_map = get_logo_map(
         spreadsheet
     )
 
-    # Download only the logos actually
-    # needed by the Iowa page.
-    download_required_logos(
-        logo_map,
-        rows
-    )
+    for team_tab in TEAM_TABS:
 
-    # Generate the Iowa page.
-    html_output = make_team_page(
-        rows
-    )
-
-    # Make sure the teams directory exists.
-    os.makedirs(
-        "teams",
-        exist_ok=True
-    )
-
-    # Write the page.
-    with open(
-        "teams/iowa.html",
-        "w",
-        encoding="utf-8"
-    ) as file:
-
-        file.write(
-            html_output
+        print(
+            f"Generating team page: {team_tab}"
         )
 
-    print(
-        "Created teams/iowa.html"
-    )
+        # Get this team's spreadsheet data.
+        rows = get_team_data(
+            spreadsheet,
+            team_tab
+        )
+
+        # Download only logos needed by this team.
+        download_required_logos(
+            logo_map,
+            rows
+        )
+
+        # Generate the team page.
+        html_output = make_team_page(
+            rows,
+            team_tab
+        )
+
+        # Create the teams directory.
+        os.makedirs(
+            "teams",
+            exist_ok=True
+        )
+
+        # Create a safe filename.
+        filename = re.sub(
+            r"[^a-z0-9]+",
+            "-",
+            team_tab.lower()
+        ).strip("-")
+
+        filepath = os.path.join(
+            "teams",
+            f"{filename}.html"
+        )
+
+        with open(
+            filepath,
+            "w",
+            encoding="utf-8"
+        ) as file:
+
+            file.write(
+                html_output
+            )
+
+        print(
+            f"Created {filepath}"
+        )
 
 
 if __name__ == "__main__":
