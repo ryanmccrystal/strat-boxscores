@@ -656,6 +656,17 @@ def make_team_page(rows):
         margin-bottom: 28px;
     }
 
+    .small-stats-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        align-items: start;
+    }
+    
+    .small-stats-row .stats-section {
+        min-width: 0;
+    }
+
 
     .stats-section h2 {
 
