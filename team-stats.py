@@ -643,8 +643,8 @@ def make_team_page(rows):
     }
 
     .fraction {
-        font-size: 0.95em;
-        vertical-align: 0.10em;
+        font-size: 0.98em;
+        vertical-align: 0.6em;
     }
 
 
