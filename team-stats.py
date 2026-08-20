@@ -703,9 +703,9 @@ def make_team_page(rows):
 
     .player-logo {
 
-        width: 18px;
+        width: 25px;
 
-        height: 18px;
+        height: 25px;
 
         object-fit: contain;
 
