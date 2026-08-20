@@ -559,7 +559,7 @@ def make_team_page(
         rows
     )
 
-    html_output = f"""
+    html_output = """
 <!DOCTYPE html>
 
 <html lang="en">
@@ -571,7 +571,7 @@ def make_team_page(
 <meta name="viewport"
       content="width=device-width, initial-scale=1.0">
 
-<title>{html_escape(team_tab)} - Strat-o-Matic</title>
+<title>TEAM_TITLE_PLACEHOLDER - Strat-o-Matic</title>
 
 <link rel="preconnect"
       href="https://fonts.googleapis.com">
@@ -904,6 +904,12 @@ def make_team_page(
 
 <div class="container">
 """
+
+    # Replace the title placeholder with the current team name.
+    html_output = html_output.replace(
+        "TEAM_TITLE_PLACEHOLDER",
+        html_escape(team_tab)
+    )
 
 
     # -----------------------------------------
