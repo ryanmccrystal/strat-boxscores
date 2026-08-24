@@ -1,7 +1,7 @@
 import os
-import re
 import json
 import html
+import re
 
 import gspread
 from google.oauth2.service_account import Credentials
@@ -11,23 +11,28 @@ from google.oauth2.service_account import Credentials
 # SETTINGS
 # ============================================================
 
-# Use the same spreadsheet ID as team-stats.py.
-SPREADSHEET_ID = "1hPnUsWFFjbFQZPrqc2F4X9f4ytjP2zb9sdhp8T0gjN0"
+SPREADSHEET_ID = (
+    "1hPnUsWFFjbFQZPrqc2F4X9f4ytjP2zb9sdhp8T0gjN0"
+)
+
+OUTPUT_FILE = "batting-stats.html"
 
 
-# Use the same team tab list as team-stats.py.
+# ============================================================
+# TEAM TABS
+# ============================================================
+
 TEAM_TABS = [
-    "Iowa",
-    "Omaha",
-    "Richmond",
-    "Pawtucket",
-    "Dunedin",
-    "Portland"
-    # Add the rest of your team tabs here.
+    # COPY THE COMPLETE TEAM_TABS LIST
+    # FROM YOUR WORKING team-stats.py HERE.
 ]
 
 
-OUTPUT_FILE = "batting-stats.html"
+# ============================================================
+# LOGOS
+# ============================================================
+
+LOGO_DIRECTORY = "logos"
 
 
 # ============================================================
@@ -36,113 +41,47 @@ OUTPUT_FILE = "batting-stats.html"
 
 def get_google_sheet():
 
-    service_account_info = json.loads(
-        os.environ["GOOGLE_SERVICE_ACCOUNT"]
-    )
-
     scopes = [
         "https://www.googleapis.com/auth/spreadsheets.readonly"
     ]
 
-    credentials = Credentials.from_service_account_info(
-        service_account_info,
-        scopes=scopes
+    credentials_info = json.loads(
+        os.environ["GOOGLE_SERVICE_ACCOUNT"]
+    )
+
+    credentials = (
+        Credentials.from_service_account_info(
+            credentials_info,
+            scopes=scopes
+        )
     )
 
     client = gspread.authorize(
         credentials
     )
 
-    spreadsheet = client.open_by_key(
+    return client.open_by_key(
         SPREADSHEET_ID
     )
 
-    return spreadsheet
-
 
 # ============================================================
-# HTML
+# HTML ESCAPE
 # ============================================================
 
 def html_escape(value):
 
     return html.escape(
-        str(value)
+        str(value),
+        quote=True
     )
 
 
 # ============================================================
-# FIND BATTING SECTION
+# GET TEAM DATA
 # ============================================================
 
-def find_batting_section(rows):
-
-    batting_start = None
-
-    for index, row in enumerate(rows):
-
-        for value in row:
-
-            if value.strip() == "Batting":
-
-                batting_start = index
-
-                break
-
-        if batting_start is not None:
-
-            break
-
-
-    if batting_start is None:
-
-        return []
-
-
-    # Find the next section after Batting.
-    section_names = [
-        "Pitching",
-        "Catching",
-        "Fielding"
-    ]
-
-    batting_end = len(rows)
-
-
-    for index in range(
-        batting_start + 1,
-        len(rows)
-    ):
-
-        row = rows[index]
-
-        found_section = False
-
-        for value in row:
-
-            if value.strip() in section_names:
-
-                batting_end = index
-
-                found_section = True
-
-                break
-
-        if found_section:
-
-            break
-
-
-    return rows[
-        batting_start:batting_end
-    ]
-
-
-# ============================================================
-# GET BATTING DATA FOR ONE TEAM
-# ============================================================
-
-def get_team_batting_data(
+def get_team_data(
     spreadsheet,
     team_tab
 ):
@@ -151,69 +90,212 @@ def get_team_batting_data(
         team_tab
     )
 
-    rows = worksheet.get_all_values()
-
-    batting_rows = find_batting_section(
-        rows
-    )
-
-    if not batting_rows:
-
-        print(
-            f"WARNING: No Batting section found for {team_tab}"
-        )
-
-        return []
-
-
-    # The first row is the "Batting" section
-    # heading. The actual table follows it.
-    data_rows = batting_rows[1:]
-
-
-    # Remove completely empty rows.
-    data_rows = [
-        row
-        for row in data_rows
-        if any(
-            value.strip()
-            for value in row
-        )
-    ]
-
-
-    return data_rows
+    return worksheet.get_all_values()
 
 
 # ============================================================
-# DETERMINE TABLE HEADER
+# FIND SECTIONS
 # ============================================================
 
-def find_header_row(rows):
+def find_section_rows(rows):
+
+    sections = {}
 
     for index, row in enumerate(rows):
 
-        # Look for the normal batting headers.
-        if (
-            "Player" in row
-            or "Name" in row
+        values = [
+            cell.strip()
+            for cell in row
+        ]
+
+        if "Pitching" in values:
+
+            sections["Pitching"] = index
+
+        elif "Batting" in values:
+
+            sections["Batting"] = index
+
+        elif "Catching" in values:
+
+            sections["Catching"] = index
+
+        elif "Fielding" in values:
+
+            sections["Fielding"] = index
+
+    return sections
+
+
+# ============================================================
+# GET SECTION ROWS
+# ============================================================
+
+def get_section_rows(
+    rows,
+    section_start,
+    next_section_start=None
+):
+
+    start = section_start + 1
+
+    if next_section_start is not None:
+
+        end = next_section_start
+
+    else:
+
+        end = len(rows)
+
+    section = rows[
+        start:end
+    ]
+
+    while (
+        section
+        and not any(
+            cell.strip()
+            for cell in section[0]
+        )
+    ):
+
+        section.pop(0)
+
+    while (
+        section
+        and not any(
+            cell.strip()
+            for cell in section[-1]
+        )
+    ):
+
+        section.pop()
+
+    return section
+
+
+# ============================================================
+# LOGO MAP
+# ============================================================
+
+def get_logo_map(spreadsheet):
+
+    worksheet = spreadsheet.worksheet(
+        "Logos"
+    )
+
+    rows = worksheet.get(
+        "A1:B1500",
+        value_render_option="FORMULA"
+    )
+
+    logo_map = {}
+
+    for row in rows:
+
+        if len(row) < 2:
+            continue
+
+        real_team = str(
+            row[0]
+        ).strip()
+
+        image_formula = str(
+            row[1]
+        ).strip()
+
+        if not real_team:
+            continue
+
+        if not image_formula.lower().startswith(
+            "=image("
+        ):
+            continue
+
+        start = image_formula.find('"')
+        end = image_formula.rfind('"')
+
+        if start == -1 or end <= start:
+            continue
+
+        logo_url = image_formula[
+            start + 1:end
+        ]
+
+        if logo_url:
+
+            logo_map[
+                real_team
+            ] = logo_url
+
+    return logo_map
+
+
+# ============================================================
+# FIND REAL TM COLUMN
+# ============================================================
+
+def find_real_team_column(header):
+
+    for index, value in enumerate(header):
+
+        header_value = (
+            value.strip().lower()
+        )
+
+        if header_value in (
+            "real tm",
+            "tm/yr",
+            "tm - yr"
         ):
 
             return index
 
-
-    return 0
+    return None
 
 
 # ============================================================
-# BUILD ALL BATTING DATA
+# GET LOGO URL FOR A ROW
+# ============================================================
+
+def get_logo_url(
+    row,
+    real_team_column,
+    logo_map
+):
+
+    if real_team_column is None:
+        return ""
+
+    if real_team_column >= len(row):
+        return ""
+
+    real_team = row[
+        real_team_column
+    ].strip()
+
+    if not real_team:
+        return ""
+
+    return logo_map.get(
+        real_team,
+        ""
+    )
+
+
+# ============================================================
+# GET ALL BATTING DATA
 # ============================================================
 
 def get_all_batting_data(
     spreadsheet
 ):
 
-    all_teams = []
+    logo_map = get_logo_map(
+        spreadsheet
+    )
+
+    all_players = []
 
     for team_tab in TEAM_TABS:
 
@@ -221,32 +303,100 @@ def get_all_batting_data(
             f"Reading batting stats: {team_tab}"
         )
 
-        rows = get_team_batting_data(
+        rows = get_team_data(
             spreadsheet,
             team_tab
         )
 
-        if not rows:
+        sections = find_section_rows(
+            rows
+        )
+
+        if "Batting" not in sections:
+
+            print(
+                f"WARNING: No Batting section "
+                f"found for {team_tab}"
+            )
 
             continue
 
 
-        header_index = find_header_row(
-            rows
+        ordered_sections = sorted(
+            sections.items(),
+            key=lambda item: item[1]
         )
 
-        headers = rows[
-            header_index
-        ]
 
-        player_rows = rows[
-            header_index + 1:
+        batting_start = sections[
+            "Batting"
         ]
 
 
-        for row in player_rows:
+        next_start = None
 
-            # Ignore empty rows.
+        for section_name, start in (
+            ordered_sections
+        ):
+
+            if start > batting_start:
+
+                next_start = start
+
+                break
+
+
+        section_rows = get_section_rows(
+            rows,
+            batting_start,
+            next_start
+        )
+
+
+        if len(section_rows) < 2:
+
+            continue
+
+
+        header = section_rows[0]
+
+        data_rows = section_rows[1:]
+
+
+        # Find the final used column.
+        last_column = 0
+
+        for row in section_rows:
+
+            for index, value in enumerate(row):
+
+                if value.strip():
+
+                    last_column = max(
+                        last_column,
+                        index
+                    )
+
+
+        header = header[
+            :last_column + 1
+        ]
+
+
+        real_team_column = (
+            find_real_team_column(
+                header
+            )
+        )
+
+
+        for row in data_rows:
+
+            row = row[
+                :last_column + 1
+            ]
+
+
             if not any(
                 value.strip()
                 for value in row
@@ -255,7 +405,7 @@ def get_all_batting_data(
                 continue
 
 
-            # Ignore the Team Totals row.
+            # Do not include Team Totals.
             if any(
                 value.strip() == "Team"
                 for value in row
@@ -264,13 +414,15 @@ def get_all_batting_data(
                 continue
 
 
-            # Ignore rows that don't appear to
-            # contain a player name.
-            player_name = ""
+            # Make sure there is a player name.
+            if len(row) < 2:
 
-            if len(row) > 0:
+                continue
 
-                player_name = row[0].strip()
+
+            player_name = row[
+                1
+            ].strip()
 
 
             if not player_name:
@@ -278,120 +430,147 @@ def get_all_batting_data(
                 continue
 
 
-            all_teams.append(
+            logo_url = get_logo_url(
+                row,
+                real_team_column,
+                logo_map
+            )
+
+
+            all_players.append(
                 {
                     "team": team_tab,
-                    "headers": headers,
-                    "values": row
+                    "header": header,
+                    "row": row,
+                    "logo_url": logo_url
                 }
             )
 
 
-    return all_teams
+    return all_players
 
 
 # ============================================================
-# TABLE
+# MAKE TABLE
 # ============================================================
 
 def make_batting_table(
-    batting_data
+    players
 ):
 
-    if not batting_data:
+    if not players:
 
         return """
         <p>No batting data found.</p>
         """
 
 
-    headers = batting_data[0]["headers"]
+    header = players[0]["header"]
 
 
     html_output = """
-    <table
-        id="batting-table"
-        class="stats-table"
-    >
+    <div class="table-wrapper">
 
-        <thead>
+        <table
+            class="batting-stats-table"
+            id="batting-stats-table"
+        >
 
-            <tr>
+            <thead>
 
-                <th
-                    class="team-column sortable"
-                    data-column="team"
-                >
-                    Team
-                </th>
+                <tr>
+
+                    <th
+                        class="sortable team-column"
+                        data-column="team"
+                    >
+                        Team
+                    </th>
     """
 
 
-    for column_index, header in enumerate(
-        headers
+    # Column A is the spreadsheet logo column.
+    # Start with the actual spreadsheet headers
+    # beginning with Column B.
+    for index, value in enumerate(
+        header[1:],
+        start=1
     ):
 
-        if not header.strip():
+        if not value.strip():
 
             continue
 
-
         html_output += f"""
-                <th
-                    class="sortable"
-                    data-column="{column_index}"
-                >
-                    {html_escape(header)}
-                </th>
+                    <th
+                        class="sortable"
+                        data-column="{index}"
+                    >
+                        {html_escape(value)}
+                    </th>
         """
 
 
     html_output += """
-            </tr>
+                </tr>
 
-        </thead>
+            </thead>
 
-        <tbody>
+            <tbody>
     """
 
 
-    for player in batting_data:
+    for player in players:
 
-        team = player["team"]
+        row = player["row"]
 
-        values = player["values"]
+        logo_url = player["logo_url"]
 
 
         html_output += """
-            <tr>
+                <tr>
         """
 
 
+        # Team column.
         html_output += f"""
-                <td class="team-column">
-                    {html_escape(team)}
-                </td>
+                    <td class="team-column">
+                        {html_escape(player["team"])}
+                    </td>
         """
 
 
-        for value in values:
+        # Spreadsheet columns B onward.
+        for column_index, value in enumerate(
+            row[1:],
+            start=1
+        ):
+
+            # Don't allow the logo formula itself
+            # to appear as text.
+            if column_index == 0:
+
+                continue
+
 
             html_output += f"""
-                <td>
-                    {html_escape(value)}
-                </td>
+                    <td>
+                        {html_escape(value)}
+                    </td>
             """
 
 
         html_output += """
-            </tr>
+                </tr>
         """
 
 
     html_output += """
-        </tbody>
+            </tbody>
 
-    </table>
+        </table>
+
+    </div>
     """
 
 
@@ -403,7 +582,7 @@ def make_batting_table(
 # ============================================================
 
 def make_page(
-    batting_data
+    players
 ):
 
     html_output = """
@@ -470,40 +649,52 @@ def make_page(
 
         font-size: 32px;
 
+        font-weight: 700;
+
         margin: 0 0 20px 0;
     }
 
 
-    .stats-table {
+    .table-wrapper {
+
+        width: 100%;
+
+        overflow-x: auto;
+    }
+
+
+    .batting-stats-table {
 
         width: 100%;
 
         border-collapse: collapse;
 
         table-layout: auto;
+
+        font-size: 14px;
+
+        white-space: nowrap;
     }
 
 
-    .stats-table th,
-    .stats-table td {
+    .batting-stats-table th,
+    .batting-stats-table td {
 
-        padding: 5px 7px;
-
-        border-bottom: 1px solid #dddddd;
-
-        white-space: nowrap;
+        padding: 4px 7px;
 
         text-align: center;
 
-        font-size: 14px;
+        line-height: 1.15;
     }
 
 
-    .stats-table th {
+    .batting-stats-table th {
 
         font-weight: 700;
 
         background: #f2f2f2;
+
+        border-bottom: 1px solid #222;
 
         cursor: pointer;
 
@@ -511,14 +702,16 @@ def make_page(
     }
 
 
-    .stats-table th:hover {
+    .batting-stats-table td {
 
-        background: #e5e5e5;
+        border-bottom: 1px solid #dddddd;
     }
 
 
-    .stats-table td.team-column,
-    .stats-table th.team-column {
+    .batting-stats-table
+    th.team-column,
+    .batting-stats-table
+    td.team-column {
 
         text-align: left;
 
@@ -526,7 +719,8 @@ def make_page(
     }
 
 
-    .stats-table tbody tr:hover {
+    .batting-stats-table
+    tbody tr:hover {
 
         background: #f5f5f5;
     }
@@ -536,9 +730,9 @@ def make_page(
 
         content: " ↕";
 
-        font-size: 11px;
+        font-size: 10px;
 
-        color: #888888;
+        color: #888;
     }
 
 
@@ -546,7 +740,7 @@ def make_page(
 
         content: " ▲";
 
-        color: #111111;
+        color: #111;
     }
 
 
@@ -554,7 +748,7 @@ def make_page(
 
         content: " ▼";
 
-        color: #111111;
+        color: #111;
     }
 
 
@@ -566,12 +760,16 @@ def make_page(
         }
 
 
-        .stats-table th,
-        .stats-table td {
-
-            padding: 4px 5px;
+        .batting-stats-table {
 
             font-size: 13px;
+        }
+
+
+        .batting-stats-table th,
+        .batting-stats-table td {
+
+            padding: 3px 5px;
         }
     }
 
@@ -586,11 +784,11 @@ def make_page(
     <h1>
         Batting Stats
     </h1>
-"""
+    """
 
 
     html_output += make_batting_table(
-        batting_data
+        players
     )
 
 
@@ -607,8 +805,9 @@ document.addEventListener(
 
         const table =
             document.getElementById(
-                "batting-table"
+                "batting-stats-table"
             );
+
 
         if (!table) {
 
@@ -632,10 +831,12 @@ document.addEventListener(
                         const column =
                             header.dataset.column;
 
+
                         const tbody =
                             table.querySelector(
                                 "tbody"
                             );
+
 
                         const rows =
                             Array.from(
@@ -645,12 +846,10 @@ document.addEventListener(
                             );
 
 
-                        const currentDirection =
+                        const descending =
                             header.classList.contains(
                                 "sort-ascending"
-                            )
-                                ? "descending"
-                                : "ascending";
+                            );
 
 
                         headers.forEach(
@@ -668,68 +867,48 @@ document.addEventListener(
 
 
                         header.classList.add(
-                            "sort-" +
-                            currentDirection
+                            descending
+                                ? "sort-descending"
+                                : "sort-ascending"
                         );
 
 
                         rows.sort(
                             function(a, b) {
 
-                                let aValue;
-                                let bValue;
-
-
-                                if (
-                                    column ===
-                                    "team"
-                                ) {
-
-                                    aValue =
-                                        a.children[0]
-                                            .textContent
-                                            .trim();
-
-                                    bValue =
-                                        b.children[0]
-                                            .textContent
-                                            .trim();
-
-                                } else {
-
-                                    const index =
-                                        parseInt(
+                                const index =
+                                    column === "team"
+                                        ? 0
+                                        : parseInt(
                                             column
-                                        ) + 1;
+                                        );
 
-                                    aValue =
-                                        a.children[index]
-                                            .textContent
-                                            .trim();
 
-                                    bValue =
-                                        b.children[index]
-                                            .textContent
-                                            .trim();
-                                }
+                                let aValue =
+                                    a.children[
+                                        index
+                                    ].textContent.trim();
+
+                                let bValue =
+                                    b.children[
+                                        index
+                                    ].textContent.trim();
 
 
                                 const aNumber =
                                     parseFloat(
-                                        aValue
-                                            .replace(
-                                                /,/g,
-                                                ""
-                                            )
+                                        aValue.replace(
+                                            /,/g,
+                                            ""
+                                        )
                                     );
 
                                 const bNumber =
                                     parseFloat(
-                                        bValue
-                                            .replace(
-                                                /,/g,
-                                                ""
-                                            )
+                                        bValue.replace(
+                                            /,/g,
+                                            ""
+                                        )
                                     );
 
 
@@ -755,10 +934,7 @@ document.addEventListener(
                                 }
 
 
-                                if (
-                                    currentDirection ===
-                                    "descending"
-                                ) {
+                                if (descending) {
 
                                     comparison *= -1;
                                 }
@@ -792,7 +968,7 @@ document.addEventListener(
 </body>
 
 </html>
-"""
+    """
 
 
     return html_output
@@ -806,12 +982,12 @@ def main():
 
     spreadsheet = get_google_sheet()
 
-    batting_data = get_all_batting_data(
+    players = get_all_batting_data(
         spreadsheet
     )
 
     html_output = make_page(
-        batting_data
+        players
     )
 
 
@@ -828,7 +1004,7 @@ def main():
 
     print(
         f"Created {OUTPUT_FILE} with "
-        f"{len(batting_data)} players."
+        f"{len(players)} players."
     )
 
 
