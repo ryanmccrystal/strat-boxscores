@@ -1,7 +1,6 @@
 import os
 import json
 import html
-import re
 
 import gspread
 from google.oauth2.service_account import Credentials
@@ -22,22 +21,14 @@ OUTPUT_FILE = "batting-stats.html"
 # TEAM TABS
 # ============================================================
 
+# KEEP THE SAME TEAM_TABS LIST FROM YOUR
+# CURRENT WORKING batting-stats.py HERE.
+
 TEAM_TABS = [
-    "Iowa",
-    "Omaha",
-    "Richmond",
-    "Pawtucket",
-    "Dunedin",
-    "Portland"
-    # Add the rest of your team tab names here
+
+    # YOUR EXISTING TEAM TABS GO HERE
+
 ]
-
-
-# ============================================================
-# LOGOS
-# ============================================================
-
-LOGO_DIRECTORY = "logos"
 
 
 # ============================================================
@@ -156,6 +147,7 @@ def get_section_rows(
         start:end
     ]
 
+
     while (
         section
         and not any(
@@ -165,6 +157,7 @@ def get_section_rows(
     ):
 
         section.pop(0)
+
 
     while (
         section
@@ -176,14 +169,22 @@ def get_section_rows(
 
         section.pop()
 
+
     return section
 
 
 # ============================================================
 # LOGO MAP
+#
+# Logos tab:
+#
+# Column A = Tm/Yr
+# Column B = IMAGE("URL")
 # ============================================================
 
-def get_logo_map(spreadsheet):
+def get_logo_map(
+    spreadsheet
+):
 
     worksheet = spreadsheet.worksheet(
         "Logos"
@@ -196,91 +197,130 @@ def get_logo_map(spreadsheet):
 
     logo_map = {}
 
+
     for row in rows:
 
         if len(row) < 2:
+
             continue
 
-        real_team = str(
+
+        team_year = str(
             row[0]
         ).strip()
+
 
         image_formula = str(
             row[1]
         ).strip()
 
-        if not real_team:
+
+        if not team_year:
+
             continue
+
 
         if not image_formula.lower().startswith(
             "=image("
         ):
+
             continue
 
-        start = image_formula.find('"')
-        end = image_formula.rfind('"')
 
-        if start == -1 or end <= start:
+        start = image_formula.find(
+            '"'
+        )
+
+        end = image_formula.rfind(
+            '"'
+        )
+
+
+        if (
+            start == -1
+            or end <= start
+        ):
+
             continue
+
 
         logo_url = image_formula[
             start + 1:end
         ]
 
+
         if logo_url:
 
             logo_map[
-                real_team
+                team_year
             ] = logo_url
+
 
     return logo_map
 
 
 # ============================================================
-# FIND REAL TM COLUMN
+# FIND TM/YR COLUMN
 # ============================================================
 
-def find_real_team_column(header):
+def find_tm_year_column(
+    header
+):
 
-    for index, value in enumerate(header):
+    for index, value in enumerate(
+        header
+    ):
 
         header_value = (
             value.strip().lower()
         )
 
+
         if header_value in (
-            "real tm",
             "tm/yr",
+            "real tm",
             "tm - yr"
         ):
 
             return index
 
+
     return None
 
 
 # ============================================================
-# GET LOGO URL FOR A ROW
+# GET LOGO FOR PLAYER
+#
+# IMPORTANT:
+# Logo is determined from the player's
+# Tm/Yr value.
 # ============================================================
 
 def get_logo_url(
     row,
-    real_team_column,
+    tm_year_column,
     logo_map
 ):
 
-    if real_team_column is None:
+    if tm_year_column is None:
+
         return ""
 
-    if real_team_column >= len(row):
+
+    if tm_year_column >= len(row):
+
         return ""
+
 
     team_year = row[
-        real_team_column
+        tm_year_column
     ].strip()
 
+
     if not team_year:
+
         return ""
+
 
     return logo_map.get(
         team_year,
@@ -302,20 +342,24 @@ def get_all_batting_data(
 
     all_players = []
 
+
     for team_tab in TEAM_TABS:
 
         print(
             f"Reading batting stats: {team_tab}"
         )
 
+
         rows = get_team_data(
             spreadsheet,
             team_tab
         )
 
+
         sections = find_section_rows(
             rows
         )
+
 
         if "Batting" not in sections:
 
@@ -340,9 +384,11 @@ def get_all_batting_data(
 
         next_start = None
 
-        for section_name, start in (
-            ordered_sections
-        ):
+
+        for (
+            section_name,
+            start
+        ) in ordered_sections:
 
             if start > batting_start:
 
@@ -368,12 +414,17 @@ def get_all_batting_data(
         data_rows = section_rows[1:]
 
 
-        # Find the final used column.
+        # Find the last column actually
+        # containing data.
+
         last_column = 0
+
 
         for row in section_rows:
 
-            for index, value in enumerate(row):
+            for index, value in enumerate(
+                row
+            ):
 
                 if value.strip():
 
@@ -388,12 +439,18 @@ def get_all_batting_data(
         ]
 
 
-        real_team_column = (
-            find_real_team_column(
+        # Find the Tm/Yr column.
+
+        tm_year_column = (
+            find_tm_year_column(
                 header
             )
         )
 
+
+        # ----------------------------------------------------
+        # PLAYER ROWS
+        # ----------------------------------------------------
 
         for row in data_rows:
 
@@ -410,16 +467,19 @@ def get_all_batting_data(
                 continue
 
 
-            # Column B contains the player name.
-            # Exclude the Team Totals row.
+            # Column B is the player name.
+            #
+            # Exclude Team Totals specifically.
+
             if len(row) > 1:
-            
+
                 if row[1].strip() == "Team Totals":
-            
+
                     continue
 
 
-            # Make sure there is a player name.
+            # Make sure Column B exists.
+
             if len(row) < 2:
 
                 continue
@@ -435,9 +495,11 @@ def get_all_batting_data(
                 continue
 
 
+            # Find logo using Tm/Yr.
+
             logo_url = get_logo_url(
                 row,
-                real_team_column,
+                tm_year_column,
                 logo_map
             )
 
@@ -456,7 +518,11 @@ def get_all_batting_data(
 
 
 # ============================================================
-# MAKE TABLE
+# MAKE BATTING TABLE
+#
+# Columns:
+#
+# Team | Logo | Player | Tm/Yr | remaining stats
 # ============================================================
 
 def make_batting_table(
@@ -487,29 +553,41 @@ def make_batting_table(
 
                     <th
                         class="sortable team-column"
-                        data-column="team"
+                        data-sort-column="team"
                     >
                         Team
+                    </th>
+
+
+                    <th class="logo-column">
+                        Logo
                     </th>
     """
 
 
-    # Column A is the spreadsheet logo column.
-    # Start with the actual spreadsheet headers
-    # beginning with Column B.
-    for index, value in enumerate(
+    # --------------------------------------------------------
+    # Spreadsheet headers.
+    #
+    # Column A is the existing logo column in the
+    # spreadsheet, so we skip it.
+    #
+    # Column B onward contains the actual batting data.
+    # --------------------------------------------------------
+
+    for column_index, value in enumerate(
         header[1:],
-        start=1
+        start=2
     ):
 
         if not value.strip():
 
             continue
 
+
         html_output += f"""
                     <th
                         class="sortable"
-                        data-column="{index}"
+                        data-sort-column="{column_index}"
                     >
                         {html_escape(value)}
                     </th>
@@ -525,6 +603,10 @@ def make_batting_table(
     """
 
 
+    # ========================================================
+    # PLAYER ROWS
+    # ========================================================
+
     for player in players:
 
         row = player["row"]
@@ -537,43 +619,51 @@ def make_batting_table(
         """
 
 
-        # Team column with logo.
-        logo_url = player["logo_url"]
-        
+        # ----------------------------------------------------
+        # TEAM
+        # ----------------------------------------------------
+
+        html_output += f"""
+                    <td class="team-column">
+                        {html_escape(player["team"])}
+                    </td>
+        """
+
+
+        # ----------------------------------------------------
+        # LOGO
+        # ----------------------------------------------------
+
         if logo_url:
-        
+
             html_output += f"""
-                            <td class="team-column">
-                                <img
-                                    src="{html_escape(logo_url)}"
-                                    class="team-logo"
-                                    alt=""
-                                >
-                                {html_escape(player["team"])}
-                            </td>
-        """
-        
+                    <td class="logo-column">
+
+                        <img
+                            src="{html_escape(logo_url)}"
+                            class="team-logo"
+                            alt=""
+                        >
+
+                    </td>
+            """
+
         else:
-        
-            html_output += f"""
-                            <td class="team-column">
-                                {html_escape(player["team"])}
-                            </td>
-        """
+
+            html_output += """
+                    <td class="logo-column"></td>
+            """
 
 
-        # Spreadsheet columns B onward.
-        for column_index, value in enumerate(
-            row[1:],
-            start=1
-        ):
+        # ----------------------------------------------------
+        # PLAYER + ALL REMAINING SPREADSHEET DATA
+        #
+        # row[1] = Player
+        # row[2] = Tm/Yr
+        # etc.
+        # ----------------------------------------------------
 
-            # Don't allow the logo formula itself
-            # to appear as text.
-            if column_index == 0:
-
-                continue
-
+        for value in row[1:]:
 
             html_output += f"""
                     <td>
@@ -621,23 +711,29 @@ def make_page(
     content="width=device-width, initial-scale=1.0"
 >
 
-<title>Batting Stats - Strat-o-Matic</title>
+<title>
+    Batting Stats - Strat-o-Matic
+</title>
+
 
 <link
     rel="preconnect"
     href="https://fonts.googleapis.com"
 >
 
+
 <link
     rel="preconnect"
-    href="https://fonts.gstatic.com"
+    href="https://fonts.googleapis.com"
     crossorigin
 >
+
 
 <link
     href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap"
     rel="stylesheet"
 >
+
 
 <style>
 
@@ -724,6 +820,13 @@ def make_page(
     }
 
 
+    .batting-stats-table
+    th.logo-column {
+
+        cursor: default;
+    }
+
+
     .batting-stats-table td {
 
         border-bottom: 1px solid #dddddd;
@@ -734,26 +837,47 @@ def make_page(
     th.team-column,
     .batting-stats-table
     td.team-column {
-    
+
         text-align: left;
-    
+
         font-weight: 600;
-    
-        vertical-align: middle;
     }
-    
-    
+
+
+    .logo-column {
+
+        width: 35px;
+
+        min-width: 35px;
+
+        max-width: 35px;
+
+        text-align: center !important;
+
+        padding-left: 3px !important;
+
+        padding-right: 3px !important;
+    }
+
+
     .team-logo {
-    
+
         width: 25px;
-    
+
         height: 25px;
-    
+
         object-fit: contain;
-    
-        vertical-align: middle;
-    
-        margin-right: 6px;
+
+        display: block;
+
+        margin: 0 auto;
+    }
+
+
+    .batting-stats-table
+    tbody tr:hover {
+
+        background: #f5f5f5;
     }
 
 
@@ -802,11 +926,21 @@ def make_page(
 
             padding: 3px 5px;
         }
+
+
+        .team-logo {
+
+            width: 25px;
+
+            height: 25px;
+        }
+
     }
 
 </style>
 
 </head>
+
 
 <body>
 
@@ -815,6 +949,7 @@ def make_page(
     <h1>
         Batting Stats
     </h1>
+
     """
 
 
@@ -859,8 +994,8 @@ document.addEventListener(
                     "click",
                     function() {
 
-                        const column =
-                            header.dataset.column;
+                        const sortColumn =
+                            header.dataset.sortColumn;
 
 
                         const tbody =
@@ -877,7 +1012,7 @@ document.addEventListener(
                             );
 
 
-                        const descending =
+                        const currentlyAscending =
                             header.classList.contains(
                                 "sort-ascending"
                             );
@@ -893,12 +1028,13 @@ document.addEventListener(
                                 otherHeader.classList.remove(
                                     "sort-descending"
                                 );
+
                             }
                         );
 
 
                         header.classList.add(
-                            descending
+                            currentlyAscending
                                 ? "sort-descending"
                                 : "sort-ascending"
                         );
@@ -907,39 +1043,80 @@ document.addEventListener(
                         rows.sort(
                             function(a, b) {
 
-                                const index =
-                                    column === "team"
-                                        ? 0
-                                        : parseInt(
-                                            column
+                                let aValue;
+                                let bValue;
+
+
+                                // Team is a special
+                                // non-spreadsheet column.
+
+                                if (
+                                    sortColumn === "team"
+                                ) {
+
+                                    aValue =
+                                        a.children[0]
+                                            .textContent
+                                            .trim();
+
+                                    bValue =
+                                        b.children[0]
+                                            .textContent
+                                            .trim();
+
+                                } else {
+
+                                    const index =
+                                        parseInt(
+                                            sortColumn
                                         );
 
 
-                                let aValue =
-                                    a.children[
-                                        index
-                                    ].textContent.trim();
+                                    // Spreadsheet
+                                    // Column B is
+                                    // HTML column 2
+                                    // because Team
+                                    // and Logo were
+                                    // inserted first.
 
-                                let bValue =
-                                    b.children[
-                                        index
-                                    ].textContent.trim();
+                                    const htmlIndex =
+                                        index + 1;
+
+
+                                    aValue =
+                                        a.children[
+                                            htmlIndex
+                                        ]
+                                            .textContent
+                                            .trim();
+
+                                    bValue =
+                                        b.children[
+                                            htmlIndex
+                                        ]
+                                            .textContent
+                                            .trim();
+
+                                }
 
 
                                 const aNumber =
                                     parseFloat(
-                                        aValue.replace(
-                                            /,/g,
-                                            ""
-                                        )
+                                        aValue
+                                            .replace(
+                                                /,/g,
+                                                ""
+                                            )
                                     );
+
 
                                 const bNumber =
                                     parseFloat(
-                                        bValue.replace(
-                                            /,/g,
-                                            ""
-                                        )
+                                        bValue
+                                            .replace(
+                                                /,/g,
+                                                ""
+                                            )
                                     );
 
 
@@ -962,16 +1139,21 @@ document.addEventListener(
                                         aValue.localeCompare(
                                             bValue
                                         );
+
                                 }
 
 
-                                if (descending) {
+                                if (
+                                    currentlyAscending
+                                ) {
 
                                     comparison *= -1;
+
                                 }
 
 
                                 return comparison;
+
                             }
                         );
 
@@ -982,6 +1164,7 @@ document.addEventListener(
                                 tbody.appendChild(
                                     row
                                 );
+
                             }
                         );
 
@@ -995,6 +1178,7 @@ document.addEventListener(
 );
 
 </script>
+
 
 </body>
 
@@ -1013,9 +1197,11 @@ def main():
 
     spreadsheet = get_google_sheet()
 
+
     players = get_all_batting_data(
         spreadsheet
     )
+
 
     html_output = make_page(
         players
@@ -1034,8 +1220,8 @@ def main():
 
 
     print(
-        f"Created {OUTPUT_FILE} with "
-        f"{len(players)} players."
+        f"Created {OUTPUT_FILE} "
+        f"with {len(players)} players."
     )
 
 
