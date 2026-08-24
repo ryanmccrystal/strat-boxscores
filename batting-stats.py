@@ -12,7 +12,7 @@ from google.oauth2.service_account import Credentials
 # ============================================================
 
 # Use the same spreadsheet ID as team-stats.py.
-SPREADSHEET_ID = "YOUR_SPREADSHEET_ID"
+SPREADSHEET_ID = "1hPnUsWFFjbFQZPrqc2F4X9f4ytjP2zb9sdhp8T0gjN0"
 
 
 # Use the same team tab list as team-stats.py.
@@ -20,6 +20,9 @@ TEAM_TABS = [
     "Iowa",
     "Omaha",
     "Richmond",
+    "Pawtucket",
+    "Dunedin",
+    "Portland"
     # Add the rest of your team tabs here.
 ]
 
