@@ -592,12 +592,20 @@ def make_pitching_table(
         # Column B = row[1].
         # ----------------------------------------------------
 
+        # Skip non-player/header rows.
+
         if (
             len(row) > 1
-            and row[1].strip()
-            == "Team Totals"
+            and row[1].strip().lower()
+            in (
+                "team",
+                "starter",
+                "bullpen",
+                "name",
+                "team totals"
+            )
         ):
-
+        
             continue
 
 
