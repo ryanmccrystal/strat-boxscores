@@ -275,15 +275,15 @@ def get_logo_url(
     if real_team_column >= len(row):
         return ""
 
-    real_team = row[
+    team_year = row[
         real_team_column
     ].strip()
 
-    if not real_team:
+    if not team_year:
         return ""
 
     return logo_map.get(
-        real_team,
+        team_year,
         ""
     )
 
