@@ -410,13 +410,13 @@ def get_all_batting_data(
                 continue
 
 
-            # Do not include Team Totals.
-            if any(
-                value.strip() == "Name"
-                for value in row
-            ):
-
-                continue
+            # Column B contains the player name.
+            # Exclude the Team Totals row.
+            if len(row) > 1:
+            
+                if row[1].strip() == "Team Totals":
+            
+                    continue
 
 
             # Make sure there is a player name.
