@@ -25,9 +25,13 @@ OUTPUT_FILE = "batting-stats.html"
 # CURRENT WORKING batting-stats.py HERE.
 
 TEAM_TABS = [
-
-    # YOUR EXISTING TEAM TABS GO HERE
-
+    "Iowa",
+    "Omaha",
+    "Richmond",
+    "Pawtucket",
+    "Dunedin",
+    "Portland"
+    # Add the rest of your team tab names here
 ]
 
 
