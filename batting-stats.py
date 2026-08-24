@@ -660,11 +660,11 @@ def make_batting_table(
 
 
         # ----------------------------------------------------
-        # PLAYER + ALL REMAINING SPREADSHEET DATA
+        # PLAYER + REMAINING DATA
         #
         # row[1] = Player
-        # row[2] = Tm/Yr
-        # etc.
+        # row[2] = Tm/Yr / Real Tm
+        # row[3] onward = remaining batting stats
         # ----------------------------------------------------
 
         for value in row[1:]:
@@ -851,29 +851,29 @@ def make_page(
     .logo-column {
 
         width: 35px;
-
+    
         min-width: 35px;
-
+    
         max-width: 35px;
-
+    
         text-align: center !important;
-
+    
         padding-left: 3px !important;
-
+    
         padding-right: 3px !important;
     }
-
-
+    
+    
     .team-logo {
-
+    
         width: 25px;
-
+    
         height: 25px;
-
+    
         object-fit: contain;
-
+    
         display: block;
-
+    
         margin: 0 auto;
     }
 
