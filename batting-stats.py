@@ -412,7 +412,7 @@ def get_all_batting_data(
 
             # Do not include Team Totals.
             if any(
-                value.strip() == "Team"
+                value.strip() == "Player"
                 for value in row
             ):
 
@@ -537,11 +537,28 @@ def make_batting_table(
         """
 
 
-        # Team column.
-        html_output += f"""
-                    <td class="team-column">
-                        {html_escape(player["team"])}
-                    </td>
+        # Team column with logo.
+        logo_url = player["logo_url"]
+        
+        if logo_url:
+        
+            html_output += f"""
+                            <td class="team-column">
+                                <img
+                                    src="{html_escape(logo_url)}"
+                                    class="team-logo"
+                                    alt=""
+                                >
+                                {html_escape(player["team"])}
+                            </td>
+        """
+        
+        else:
+        
+            html_output += f"""
+                            <td class="team-column">
+                                {html_escape(player["team"])}
+                            </td>
         """
 
 
@@ -717,17 +734,26 @@ def make_page(
     th.team-column,
     .batting-stats-table
     td.team-column {
-
+    
         text-align: left;
-
+    
         font-weight: 600;
+    
+        vertical-align: middle;
     }
-
-
-    .batting-stats-table
-    tbody tr:hover {
-
-        background: #f5f5f5;
+    
+    
+    .team-logo {
+    
+        width: 25px;
+    
+        height: 25px;
+    
+        object-fit: contain;
+    
+        vertical-align: middle;
+    
+        margin-right: 6px;
     }
 
 
