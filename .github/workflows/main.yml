@@ -31,6 +31,7 @@ jobs:
           python boxscores.py
           python team-stats.py
           python batting-stats.py
+          python pitching-stats.py
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
