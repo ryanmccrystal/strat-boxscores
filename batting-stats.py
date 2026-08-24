@@ -412,7 +412,7 @@ def get_all_batting_data(
 
             # Do not include Team Totals.
             if any(
-                value.strip() == "Player"
+                value.strip() == "Name"
                 for value in row
             ):
 
