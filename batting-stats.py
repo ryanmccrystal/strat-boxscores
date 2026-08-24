@@ -1,6 +1,7 @@
 import os
 import json
 import html
+import re
 
 import gspread
 from google.oauth2.service_account import Credentials
@@ -16,13 +17,12 @@ SPREADSHEET_ID = (
 
 OUTPUT_FILE = "batting-stats.html"
 
+LOGO_DIRECTORY = "logos"
+
 
 # ============================================================
 # TEAM TABS
 # ============================================================
-
-# KEEP THE SAME TEAM_TABS LIST FROM YOUR
-# CURRENT WORKING batting-stats.py HERE.
 
 TEAM_TABS = [
     "Iowa",
@@ -31,7 +31,7 @@ TEAM_TABS = [
     "Pawtucket",
     "Dunedin",
     "Portland"
-    # Add the rest of your team tab names here
+    # Keep the rest of your existing team tabs here.
 ]
 
 
@@ -178,96 +178,39 @@ def get_section_rows(
 
 
 # ============================================================
-# LOGO MAP
+# MAKE LOGO FILENAME
 #
-# Logos tab:
+# This is the same filename system used by team-stats.py.
 #
-# Column A = Tm/Yr
-# Column B = IMAGE("URL")
+# Example:
+#
+# "CLE 2025"
+#     ->
+# "cle-2025.gif"
 # ============================================================
 
-def get_logo_map(
-    spreadsheet
+def make_logo_filename(
+    real_team
 ):
 
-    worksheet = spreadsheet.worksheet(
-        "Logos"
+    filename = real_team.lower()
+
+    filename = re.sub(
+        r"[^a-z0-9]+",
+        "-",
+        filename
     )
 
-    rows = worksheet.get(
-        "A1:B1500",
-        value_render_option="FORMULA"
-    )
+    filename = filename.strip("-")
 
-    logo_map = {}
-
-
-    for row in rows:
-
-        if len(row) < 2:
-
-            continue
-
-
-        team_year = str(
-            row[0]
-        ).strip()
-
-
-        image_formula = str(
-            row[1]
-        ).strip()
-
-
-        if not team_year:
-
-            continue
-
-
-        if not image_formula.lower().startswith(
-            "=image("
-        ):
-
-            continue
-
-
-        start = image_formula.find(
-            '"'
-        )
-
-        end = image_formula.rfind(
-            '"'
-        )
-
-
-        if (
-            start == -1
-            or end <= start
-        ):
-
-            continue
-
-
-        logo_url = image_formula[
-            start + 1:end
-        ]
-
-
-        if logo_url:
-
-            logo_map[
-                team_year
-            ] = logo_url
-
-
-    return logo_map
+    return filename + ".gif"
 
 
 # ============================================================
-# FIND TM/YR COLUMN
+# FIND REAL TM / TM-YR COLUMN
 # ============================================================
 
-def find_tm_year_column(
+def find_real_team_column(
     header
 ):
 
@@ -281,8 +224,8 @@ def find_tm_year_column(
 
 
         if header_value in (
-            "tm/yr",
             "real tm",
+            "tm/yr",
             "tm - yr"
         ):
 
@@ -293,43 +236,57 @@ def find_tm_year_column(
 
 
 # ============================================================
-# GET LOGO FOR PLAYER
+# GET LOCAL LOGO FOR PLAYER
 #
-# IMPORTANT:
-# Logo is determined from the player's
-# Tm/Yr value.
+# This intentionally does NOT download anything.
+#
+# It simply checks the existing logos/ directory.
 # ============================================================
 
-def get_logo_url(
+def get_local_logo_filename(
     row,
-    tm_year_column,
-    logo_map
+    real_team_column
 ):
 
-    if tm_year_column is None:
+    if real_team_column is None:
 
         return ""
 
 
-    if tm_year_column >= len(row):
+    if real_team_column >= len(row):
 
         return ""
 
 
-    team_year = row[
-        tm_year_column
+    real_team = row[
+        real_team_column
     ].strip()
 
 
-    if not team_year:
+    if not real_team:
 
         return ""
 
 
-    return logo_map.get(
-        team_year,
-        ""
+    logo_filename = make_logo_filename(
+        real_team
     )
+
+
+    logo_path = os.path.join(
+        LOGO_DIRECTORY,
+        logo_filename
+    )
+
+
+    if os.path.exists(
+        logo_path
+    ):
+
+        return logo_filename
+
+
+    return ""
 
 
 # ============================================================
@@ -339,10 +296,6 @@ def get_logo_url(
 def get_all_batting_data(
     spreadsheet
 ):
-
-    logo_map = get_logo_map(
-        spreadsheet
-    )
 
     all_players = []
 
@@ -418,8 +371,9 @@ def get_all_batting_data(
         data_rows = section_rows[1:]
 
 
-        # Find the last column actually
-        # containing data.
+        # ----------------------------------------------------
+        # Find the final used column.
+        # ----------------------------------------------------
 
         last_column = 0
 
@@ -443,10 +397,12 @@ def get_all_batting_data(
         ]
 
 
-        # Find the Tm/Yr column.
+        # ----------------------------------------------------
+        # Find Real Tm / Tm-Yr.
+        # ----------------------------------------------------
 
-        tm_year_column = (
-            find_tm_year_column(
+        real_team_column = (
+            find_real_team_column(
                 header
             )
         )
@@ -471,15 +427,18 @@ def get_all_batting_data(
                 continue
 
 
-            # Column B is the player name.
+            # Column B must be "Team Totals"
+            # to exclude the row.
             #
-            # Exclude Team Totals specifically.
+            # This is intentionally checking
+            # Column B specifically.
 
-            if len(row) > 1:
+            if (
+                len(row) > 1
+                and row[1].strip() == "Team Totals"
+            ):
 
-                if row[1].strip() == "Team Totals":
-
-                    continue
+                continue
 
 
             # Make sure Column B exists.
@@ -499,12 +458,15 @@ def get_all_batting_data(
                 continue
 
 
-            # Find logo using Tm/Yr.
+            # ------------------------------------------------
+            # Find the existing local logo.
+            # ------------------------------------------------
 
-            logo_url = get_logo_url(
-                row,
-                tm_year_column,
-                logo_map
+            logo_filename = (
+                get_local_logo_filename(
+                    row,
+                    real_team_column
+                )
             )
 
 
@@ -513,7 +475,7 @@ def get_all_batting_data(
                     "team": team_tab,
                     "header": header,
                     "row": row,
-                    "logo_url": logo_url
+                    "logo_filename": logo_filename
                 }
             )
 
@@ -524,9 +486,7 @@ def get_all_batting_data(
 # ============================================================
 # MAKE BATTING TABLE
 #
-# Columns:
-#
-# Team | Logo | Player | Tm/Yr | remaining stats
+# Team | Logo | Player | Real Tm | ...
 # ============================================================
 
 def make_batting_table(
@@ -572,10 +532,9 @@ def make_batting_table(
     # --------------------------------------------------------
     # Spreadsheet headers.
     #
-    # Column A is the existing logo column in the
-    # spreadsheet, so we skip it.
+    # Spreadsheet Column A is skipped.
     #
-    # Column B onward contains the actual batting data.
+    # Column B onward is displayed.
     # --------------------------------------------------------
 
     for column_index, value in enumerate(
@@ -615,7 +574,9 @@ def make_batting_table(
 
         row = player["row"]
 
-        logo_url = player["logo_url"]
+        logo_filename = (
+            player["logo_filename"]
+        )
 
 
         html_output += """
@@ -636,15 +597,18 @@ def make_batting_table(
 
         # ----------------------------------------------------
         # LOGO
+        #
+        # batting-stats.html is in the repository root,
+        # so the path is logos/filename.gif
         # ----------------------------------------------------
 
-        if logo_url:
+        if logo_filename:
 
             html_output += f"""
                     <td class="logo-column">
 
                         <img
-                            src="{html_escape(logo_url)}"
+                            src="logos/{html_escape(logo_filename)}"
                             class="team-logo"
                             alt=""
                         >
@@ -660,11 +624,11 @@ def make_batting_table(
 
 
         # ----------------------------------------------------
-        # PLAYER + REMAINING DATA
+        # PLAYER + REMAINING SPREADSHEET DATA
         #
         # row[1] = Player
-        # row[2] = Tm/Yr / Real Tm
-        # row[3] onward = remaining batting stats
+        # row[2] = Real Tm / Tm-Yr
+        # etc.
         # ----------------------------------------------------
 
         for value in row[1:]:
@@ -851,29 +815,29 @@ def make_page(
     .logo-column {
 
         width: 35px;
-    
+
         min-width: 35px;
-    
+
         max-width: 35px;
-    
+
         text-align: center !important;
-    
+
         padding-left: 3px !important;
-    
+
         padding-right: 3px !important;
     }
-    
-    
+
+
     .team-logo {
-    
+
         width: 25px;
-    
+
         height: 25px;
-    
+
         object-fit: contain;
-    
+
         display: block;
-    
+
         margin: 0 auto;
     }
 
@@ -1051,8 +1015,9 @@ document.addEventListener(
                                 let bValue;
 
 
-                                // Team is a special
-                                // non-spreadsheet column.
+                                // ------------------------------------------------
+                                // Team column
+                                // ------------------------------------------------
 
                                 if (
                                     sortColumn === "team"
@@ -1068,20 +1033,29 @@ document.addEventListener(
                                             .textContent
                                             .trim();
 
-                                } else {
+                                }
+
+
+                                // ------------------------------------------------
+                                // Spreadsheet columns
+                                //
+                                // Team = HTML column 0
+                                // Logo = HTML column 1
+                                //
+                                // Spreadsheet Column B = HTML column 2
+                                //
+                                // Therefore:
+                                //
+                                // HTML index = spreadsheet index + 1
+                                // ------------------------------------------------
+
+                                else {
 
                                     const index =
                                         parseInt(
                                             sortColumn
                                         );
 
-
-                                    // Spreadsheet
-                                    // Column B is
-                                    // HTML column 2
-                                    // because Team
-                                    // and Logo were
-                                    // inserted first.
 
                                     const htmlIndex =
                                         index + 1;
