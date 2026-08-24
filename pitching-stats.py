@@ -363,11 +363,22 @@ def get_pitching_rows(
     rows
 ):
 
-    pitching_start = (
-        find_pitching_section(
-            rows
-        )
-    )
+    # Find the row containing "Pitching".
+
+    pitching_start = None
+
+    for index, row in enumerate(rows):
+
+        values = [
+            cell.strip()
+            for cell in row
+        ]
+
+        if "Pitching" in values:
+
+            pitching_start = index
+
+            break
 
 
     if pitching_start is None:
@@ -375,68 +386,47 @@ def get_pitching_rows(
         return []
 
 
-    start = pitching_start + 1
+    # The row immediately after "Pitching"
+    # is the pitching table header.
+
+    header_index = (
+        pitching_start + 1
+    )
 
 
-    # Find the next major section.
+    if header_index >= len(rows):
 
-    end = len(rows)
-
-
-    for index in range(
-        start,
-        len(rows)
-    ):
-
-        values = [
-            cell.strip()
-            for cell in rows[index]
-        ]
+        return []
 
 
-        if (
-            "Catching" in values
-            or
-            "Fielding" in values
-        ):
-
-            end = index
-
-            break
-
-
-    section = rows[
-        start:end
+    header = rows[
+        header_index
     ]
 
 
-    # Remove blank rows from beginning.
+    # The 10 rows immediately after the
+    # pitching header are the pitchers.
 
-    while (
-        section
-        and not any(
-            cell.strip()
-            for cell in section[0]
-        )
-    ):
+    pitcher_start = (
+        header_index + 1
+    )
 
-        section.pop(0)
-
-
-    # Remove blank rows from end.
-
-    while (
-        section
-        and not any(
-            cell.strip()
-            for cell in section[-1]
-        )
-    ):
-
-        section.pop()
+    pitcher_end = (
+        pitcher_start + 10
+    )
 
 
-    return section
+    pitcher_rows = rows[
+        pitcher_start:pitcher_end
+    ]
+
+
+    # Return the header followed by
+    # exactly those 10 pitcher rows.
+
+    return [
+        header
+    ] + pitcher_rows
 
 
 # ============================================================
