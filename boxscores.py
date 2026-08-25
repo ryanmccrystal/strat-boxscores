@@ -1730,97 +1730,102 @@ def create_html(
         standings_rows
     )
 
-# ============================================================
-# LEADERBOARDS
-# ============================================================
+    # ============================================================
+    # LEADERBOARDS
+    # ============================================================
 
-leaderboards = {
+    leaderboards = {
 
-    "BA": get_leaderboard(
-        spreadsheet,
-        "Batting",
-        {
-            "ba",
-            "avg",
-            "batting average"
-        }
-    ),
+        "BA": get_leaderboard(
+            spreadsheet,
+            "Batting",
+            {
+                "ba",
+                "avg",
+                "batting average"
+            }
+        ),
 
-    "HR": get_leaderboard(
-        spreadsheet,
-        "Batting",
-        {
-            "hr",
-            "home runs"
-        }
-    ),
+        "HR": get_leaderboard(
+            spreadsheet,
+            "Batting",
+            {
+                "hr",
+                "home runs"
+            }
+        ),
 
-    "RBI": get_leaderboard(
-        spreadsheet,
-        "Batting",
-        {
-            "rbi",
-            "runs batted in"
-        }
-    ),
+        "RBI": get_leaderboard(
+            spreadsheet,
+            "Batting",
+            {
+                "rbi",
+                "runs batted in"
+            }
+        ),
 
-    "OPS": get_leaderboard(
-        spreadsheet,
-        "Batting",
-        {
-            "ops"
-        }
-    ),
+        "OPS": get_leaderboard(
+            spreadsheet,
+            "Batting",
+            {
+                "ops"
+            }
+        ),
 
-    "SB": get_leaderboard(
-        spreadsheet,
-        "Batting",
-        {
-            "sb",
-            "stolen bases"
-        }
-    ),
+        "SB": get_leaderboard(
+            spreadsheet,
+            "Batting",
+            {
+                "sb",
+                "stolen bases"
+            }
+        ),
 
-    "ERA": get_leaderboard(
-        spreadsheet,
-        "Pitching",
-        {
-            "era",
-            "earned run average"
-        },
-        starters_only=True
-    ),
+        "ERA": get_leaderboard(
+            spreadsheet,
+            "Pitching",
+            {
+                "era",
+                "earned run average"
+            },
+            starters_only=True
+        ),
 
-    "K": get_leaderboard(
-        spreadsheet,
-        "Pitching",
-        {
-            "k",
-            "so",
-            "strikeouts"
-        }
-    ),
+        "K": get_leaderboard(
+            spreadsheet,
+            "Pitching",
+            {
+                "k",
+                "so",
+                "strikeouts"
+            }
+        ),
 
-    "Saves": get_leaderboard(
-        spreadsheet,
-        "Pitching",
-        {
-            "sv",
-            "saves"
-        }
-    ),
+        "Saves": get_leaderboard(
+            spreadsheet,
+            "Pitching",
+            {
+                "sv",
+                "saves"
+            }
+        ),
 
-    "Holds": get_leaderboard(
-        spreadsheet,
-        "Pitching",
-        {
-            "hld",
-            "holds"
-        }
-    ),
-}
+        "Holds": get_leaderboard(
+            spreadsheet,
+            "Pitching",
+            {
+                "hld",
+                "holds"
+            }
+        ),
+    }
 
-html += """
+
+    # ============================================================
+    # LEADERBOARD HTML
+    # ============================================================
+
+    html += """
 <div class="leaderboards">
 
     <div class="leaderboard-column">
@@ -1829,11 +1834,11 @@ html += """
 
             <h3>BA</h3>
 
-"""
+    """
 
-for player in leaderboards["BA"]:
+    for player in leaderboards["BA"]:
 
-    html += f"""
+        html += f"""
             <div class="leaderboard-row">
 
                 <span>
@@ -1846,10 +1851,9 @@ for player in leaderboards["BA"]:
                 </span>
 
             </div>
-"""
+    """
 
-
-html += """
+    html += """
         </div>
 
 
@@ -1857,11 +1861,11 @@ html += """
 
             <h3>OPS</h3>
 
-"""
+    """
 
-for player in leaderboards["OPS"]:
+    for player in leaderboards["OPS"]:
 
-    html += f"""
+        html += f"""
             <div class="leaderboard-row">
 
                 <span>
@@ -1874,10 +1878,9 @@ for player in leaderboards["OPS"]:
                 </span>
 
             </div>
-"""
+    """
 
-
-html += """
+    html += """
         </div>
 
 
@@ -1885,11 +1888,11 @@ html += """
 
             <h3>K</h3>
 
-"""
+    """
 
-for player in leaderboards["K"]:
+    for player in leaderboards["K"]:
 
-    html += f"""
+        html += f"""
             <div class="leaderboard-row">
 
                 <span>
@@ -1902,10 +1905,9 @@ for player in leaderboards["K"]:
                 </span>
 
             </div>
-"""
+    """
 
-
-html += """
+    html += """
         </div>
 
     </div>
@@ -1917,11 +1919,11 @@ html += """
 
             <h3>HR</h3>
 
-"""
+    """
 
-for player in leaderboards["HR"]:
+    for player in leaderboards["HR"]:
 
-    html += f"""
+        html += f"""
             <div class="leaderboard-row">
 
                 <span>
@@ -1934,10 +1936,9 @@ for player in leaderboards["HR"]:
                 </span>
 
             </div>
-"""
+    """
 
-
-html += """
+    html += """
         </div>
 
 
@@ -1945,11 +1946,11 @@ html += """
 
             <h3>SB</h3>
 
-"""
+    """
 
-for player in leaderboards["SB"]:
+    for player in leaderboards["SB"]:
 
-    html += f"""
+        html += f"""
             <div class="leaderboard-row">
 
                 <span>
@@ -1962,10 +1963,9 @@ for player in leaderboards["SB"]:
                 </span>
 
             </div>
-"""
+    """
 
-
-html += """
+    html += """
         </div>
 
 
@@ -1973,11 +1973,11 @@ html += """
 
             <h3>Saves</h3>
 
-"""
+    """
 
-for player in leaderboards["Saves"]:
+    for player in leaderboards["Saves"]:
 
-    html += f"""
+        html += f"""
             <div class="leaderboard-row">
 
                 <span>
@@ -1990,10 +1990,9 @@ for player in leaderboards["Saves"]:
                 </span>
 
             </div>
-"""
+    """
 
-
-html += """
+    html += """
         </div>
 
     </div>
@@ -2005,11 +2004,11 @@ html += """
 
             <h3>RBI</h3>
 
-"""
+    """
 
-for player in leaderboards["RBI"]:
+    for player in leaderboards["RBI"]:
 
-    html += f"""
+        html += f"""
             <div class="leaderboard-row">
 
                 <span>
@@ -2022,10 +2021,9 @@ for player in leaderboards["RBI"]:
                 </span>
 
             </div>
-"""
+    """
 
-
-html += """
+    html += """
         </div>
 
 
@@ -2033,11 +2031,11 @@ html += """
 
             <h3>ERA</h3>
 
-"""
+    """
 
-for player in leaderboards["ERA"]:
+    for player in leaderboards["ERA"]:
 
-    html += f"""
+        html += f"""
             <div class="leaderboard-row">
 
                 <span>
@@ -2050,10 +2048,9 @@ for player in leaderboards["ERA"]:
                 </span>
 
             </div>
-"""
+    """
 
-
-html += """
+    html += """
         </div>
 
 
@@ -2061,11 +2058,11 @@ html += """
 
             <h3>Holds</h3>
 
-"""
+    """
 
-for player in leaderboards["Holds"]:
+    for player in leaderboards["Holds"]:
 
-    html += f"""
+        html += f"""
             <div class="leaderboard-row">
 
                 <span>
@@ -2078,84 +2075,88 @@ for player in leaderboards["Holds"]:
                 </span>
 
             </div>
-"""
+    """
 
-
-html += """
+    html += """
         </div>
 
     </div>
 
 </div>
-"""
+    """
 
-html += """
+
+    # ============================================================
+    # GAMES
+    # ============================================================
+
+    html += """
 <div class="games-grid">
-"""
+    """
 
-# Calculate season-to-date batting note totals.
-get_note_season_totals(
-    games,
-    batting_by_game
-)
-
-# Tracks season-to-date pitching records.
-records = {}
-
-for game in games:
-
-    game_id = game["game_id"]
-
-    batting_rows = batting_by_game.get(
-        game_id,
-        []
+    # Calculate season-to-date batting note totals.
+    get_note_season_totals(
+        games,
+        batting_by_game
     )
 
-    pitching_rows = pitching_by_game.get(
-        game_id,
-        []
-    )
+    # Tracks season-to-date pitching records.
+    records = {}
 
-    linescore_rows = linescore_by_game.get(
-        game_id,
-        []
-    )
+    for game in games:
 
-    html += make_game_section(
-        game,
-        batting_rows,
-        pitching_rows,
-        records,
-        home_away_order,
-        linescore_rows
-    )
+        game_id = game["game_id"]
 
-    # Update pitcher records AFTER generating
-    # the current game's box score.
-    for pitcher in pitching_rows:
-
-        decision = get_pitcher_decision(
-            pitcher
+        batting_rows = batting_by_game.get(
+            game_id,
+            []
         )
 
-        if decision:
+        pitching_rows = pitching_by_game.get(
+            game_id,
+            []
+        )
 
-            update_pitcher_record(
-                records,
-                pitcher["pitcher"],
-                decision
+        linescore_rows = linescore_by_game.get(
+            game_id,
+            []
+        )
+
+        html += make_game_section(
+            game,
+            batting_rows,
+            pitching_rows,
+            records,
+            home_away_order,
+            linescore_rows
+        )
+
+        # Update pitcher records AFTER generating
+        # the current game's box score.
+        for pitcher in pitching_rows:
+
+            decision = get_pitcher_decision(
+                pitcher
             )
 
-html += """
+            if decision:
+
+                update_pitcher_record(
+                    records,
+                    pitcher["pitcher"],
+                    decision
+                )
+
+    html += """
 </div>
 
 </div>
 
 </body>
 </html>
-"""
+    """
 
-return html
+    return html
 
 def main():
 
