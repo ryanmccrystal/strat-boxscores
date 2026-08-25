@@ -2089,20 +2089,20 @@ html += """
 </div>
 """
 
-html += """
+    html += """
 <div class="games-grid">
 """
 
-# Calculate season-to-date batting note totals.
-get_note_season_totals(
-    games,
-    batting_by_game
-)
+    # Calculate season-to-date batting note totals.
+    get_note_season_totals(
+        games,
+        batting_by_game
+    )
 
-# Tracks season-to-date pitching records.
-records = {}
+    # Tracks season-to-date pitching records.
+    records = {}
 
-for game in games:
+    for game in games:
 
         game_id = game["game_id"]
 
@@ -2146,7 +2146,7 @@ for game in games:
                     decision
                 )
 
-html += """
+    html += """
 </div>
 
 </div>
