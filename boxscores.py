@@ -2146,7 +2146,7 @@ for game in games:
                     decision
                 )
 
-    html += """
+html += """
 </div>
 
 </div>
