@@ -24,6 +24,181 @@ TEAM_NICKNAMES = {
     "Dunedin Blue Jays": "Blue Jays",
 }
 
+# ============================================================
+# LEADERBOARD DATA
+# ============================================================
+
+def find_section_rows(rows, section_name):
+
+    for index, row in enumerate(rows):
+
+        for value in row:
+
+            if value.strip() == section_name:
+
+                return index
+
+    return None
+
+
+def get_leaderboard(
+    spreadsheet,
+    section_name,
+    stat_names,
+    starters_only=False
+):
+
+    players = []
+
+    for team_code, team_name in TEAM_NAMES.items():
+
+        worksheet = spreadsheet.worksheet(
+            team_name
+        )
+
+        rows = worksheet.get_all_values()
+
+        section_index = find_section_rows(
+            rows,
+            section_name
+        )
+
+        if section_index is None:
+
+            continue
+
+        header_index = section_index + 1
+
+        if header_index >= len(rows):
+
+            continue
+
+        header = rows[header_index]
+
+        # Find the statistic column.
+        stat_column = None
+
+        for index, value in enumerate(header):
+
+            if (
+                value.strip().lower()
+                in stat_names
+            ):
+
+                stat_column = index
+
+                break
+
+        if stat_column is None:
+
+            continue
+
+        # Find GS for ERA.
+        gs_column = None
+
+        if starters_only:
+
+            for index, value in enumerate(header):
+
+                if (
+                    value.strip().lower()
+                    in {
+                        "gs",
+                        "games started"
+                    }
+                ):
+
+                    gs_column = index
+
+                    break
+
+            if gs_column is None:
+
+                continue
+
+        # Each team has 10 players/pitchers
+        # immediately below the header.
+        player_rows = rows[
+            header_index + 1:
+            header_index + 11
+        ]
+
+        for row in player_rows:
+
+            if len(row) <= 1:
+
+                continue
+
+            player_name = row[1].strip()
+
+            if not player_name:
+
+                continue
+
+            # Never include Team Totals.
+            if player_name.lower() == "team totals":
+
+                continue
+
+            if stat_column >= len(row):
+
+                continue
+
+            stat_text = row[stat_column].strip()
+
+            if not stat_text:
+
+                continue
+
+            # ERA is starters only.
+            if starters_only:
+
+                if gs_column >= len(row):
+
+                    continue
+
+                try:
+
+                    gs = float(
+                        row[gs_column].strip()
+                    )
+
+                except ValueError:
+
+                    gs = 0
+
+                if gs < 1:
+
+                    continue
+
+            try:
+
+                numeric_value = float(
+                    stat_text
+                )
+
+            except ValueError:
+
+                continue
+
+            players.append(
+                {
+                    "name": player_name,
+                    "team": team_code,
+                    "value": numeric_value,
+                    "display": stat_text
+                }
+            )
+
+    # Highest values first.
+    players.sort(
+        key=lambda player:
+            player["value"],
+        reverse=True
+    )
+
+    return players[:5]
+
 
 def get_google_sheet():
     scopes = [
