@@ -1302,6 +1302,109 @@ def create_html(
         margin: 0 0 22px 0;
     }
 
+    /* ============================================================
+       LEADERBOARDS
+       ============================================================ */
+    
+    .leaderboards {
+    
+        display: grid;
+    
+        grid-template-columns:
+            repeat(3, 1fr);
+    
+        gap: 24px;
+    
+        margin-top: 25px;
+    
+        margin-bottom: 30px;
+    }
+    
+    
+    .leaderboard-column {
+    
+        display: flex;
+    
+        flex-direction: column;
+    
+        gap: 22px;
+    }
+    
+    
+    .leaderboard {
+    
+        width: 100%;
+    }
+    
+    
+    .leaderboard h3 {
+    
+        margin: 0 0 6px 0;
+    
+        font-size: 18px;
+    
+        font-weight: 700;
+    }
+    
+    
+    .leaderboard-row {
+    
+        display: flex;
+    
+        justify-content: space-between;
+    
+        align-items: baseline;
+    
+        gap: 12px;
+    
+        font-size: 14px;
+    
+        line-height: 1.5;
+    }
+    
+    
+    .leaderboard-row span:first-child {
+    
+        white-space: nowrap;
+    
+        overflow: hidden;
+    
+        text-overflow: ellipsis;
+    }
+    
+    
+    .leaderboard-row span:last-child {
+    
+        font-variant-numeric:
+            tabular-nums;
+    
+        text-align: right;
+    
+        white-space: nowrap;
+    }
+    
+    
+    /* ============================================================
+       LEADERBOARDS - MOBILE
+       ============================================================ */
+    
+    @media (max-width: 900px) {
+    
+        .leaderboards {
+    
+            grid-template-columns: 1fr;
+    
+            gap: 18px;
+        }
+    
+    
+        .leaderboard-column {
+    
+            gap: 18px;
+        }
+    
+    }
+
     /* =========================
        GAME GRID
        ========================= */
@@ -1626,6 +1729,365 @@ def create_html(
     html += make_standings_section(
         standings_rows
     )
+
+# ============================================================
+# LEADERBOARDS
+# ============================================================
+
+leaderboards = {
+
+    "BA": get_leaderboard(
+        spreadsheet,
+        "Batting",
+        {
+            "ba",
+            "avg",
+            "batting average"
+        }
+    ),
+
+    "HR": get_leaderboard(
+        spreadsheet,
+        "Batting",
+        {
+            "hr",
+            "home runs"
+        }
+    ),
+
+    "RBI": get_leaderboard(
+        spreadsheet,
+        "Batting",
+        {
+            "rbi",
+            "runs batted in"
+        }
+    ),
+
+    "OPS": get_leaderboard(
+        spreadsheet,
+        "Batting",
+        {
+            "ops"
+        }
+    ),
+
+    "SB": get_leaderboard(
+        spreadsheet,
+        "Batting",
+        {
+            "sb",
+            "stolen bases"
+        }
+    ),
+
+    "ERA": get_leaderboard(
+        spreadsheet,
+        "Pitching",
+        {
+            "era",
+            "earned run average"
+        },
+        starters_only=True
+    ),
+
+    "K": get_leaderboard(
+        spreadsheet,
+        "Pitching",
+        {
+            "k",
+            "so",
+            "strikeouts"
+        }
+    ),
+
+    "Saves": get_leaderboard(
+        spreadsheet,
+        "Pitching",
+        {
+            "sv",
+            "saves"
+        }
+    ),
+
+    "Holds": get_leaderboard(
+        spreadsheet,
+        "Pitching",
+        {
+            "hld",
+            "holds"
+        }
+    ),
+}
+
+html += """
+<div class="leaderboards">
+
+    <div class="leaderboard-column">
+
+        <div class="leaderboard">
+
+            <h3>BA</h3>
+
+"""
+
+for player in leaderboards["BA"]:
+
+    html += f"""
+            <div class="leaderboard-row">
+
+                <span>
+                    {html_escape(player["name"])},
+                    {html_escape(player["team"])}
+                </span>
+
+                <span>
+                    {html_escape(player["display"])}
+                </span>
+
+            </div>
+"""
+
+
+html += """
+        </div>
+
+
+        <div class="leaderboard">
+
+            <h3>OPS</h3>
+
+"""
+
+for player in leaderboards["OPS"]:
+
+    html += f"""
+            <div class="leaderboard-row">
+
+                <span>
+                    {html_escape(player["name"])},
+                    {html_escape(player["team"])}
+                </span>
+
+                <span>
+                    {html_escape(player["display"])}
+                </span>
+
+            </div>
+"""
+
+
+html += """
+        </div>
+
+
+        <div class="leaderboard">
+
+            <h3>K</h3>
+
+"""
+
+for player in leaderboards["K"]:
+
+    html += f"""
+            <div class="leaderboard-row">
+
+                <span>
+                    {html_escape(player["name"])},
+                    {html_escape(player["team"])}
+                </span>
+
+                <span>
+                    {html_escape(player["display"])}
+                </span>
+
+            </div>
+"""
+
+
+html += """
+        </div>
+
+    </div>
+
+
+    <div class="leaderboard-column">
+
+        <div class="leaderboard">
+
+            <h3>HR</h3>
+
+"""
+
+for player in leaderboards["HR"]:
+
+    html += f"""
+            <div class="leaderboard-row">
+
+                <span>
+                    {html_escape(player["name"])},
+                    {html_escape(player["team"])}
+                </span>
+
+                <span>
+                    {html_escape(player["display"])}
+                </span>
+
+            </div>
+"""
+
+
+html += """
+        </div>
+
+
+        <div class="leaderboard">
+
+            <h3>SB</h3>
+
+"""
+
+for player in leaderboards["SB"]:
+
+    html += f"""
+            <div class="leaderboard-row">
+
+                <span>
+                    {html_escape(player["name"])},
+                    {html_escape(player["team"])}
+                </span>
+
+                <span>
+                    {html_escape(player["display"])}
+                </span>
+
+            </div>
+"""
+
+
+html += """
+        </div>
+
+
+        <div class="leaderboard">
+
+            <h3>Saves</h3>
+
+"""
+
+for player in leaderboards["Saves"]:
+
+    html += f"""
+            <div class="leaderboard-row">
+
+                <span>
+                    {html_escape(player["name"])},
+                    {html_escape(player["team"])}
+                </span>
+
+                <span>
+                    {html_escape(player["display"])}
+                </span>
+
+            </div>
+"""
+
+
+html += """
+        </div>
+
+    </div>
+
+
+    <div class="leaderboard-column">
+
+        <div class="leaderboard">
+
+            <h3>RBI</h3>
+
+"""
+
+for player in leaderboards["RBI"]:
+
+    html += f"""
+            <div class="leaderboard-row">
+
+                <span>
+                    {html_escape(player["name"])},
+                    {html_escape(player["team"])}
+                </span>
+
+                <span>
+                    {html_escape(player["display"])}
+                </span>
+
+            </div>
+"""
+
+
+html += """
+        </div>
+
+
+        <div class="leaderboard">
+
+            <h3>ERA</h3>
+
+"""
+
+for player in leaderboards["ERA"]:
+
+    html += f"""
+            <div class="leaderboard-row">
+
+                <span>
+                    {html_escape(player["name"])},
+                    {html_escape(player["team"])}
+                </span>
+
+                <span>
+                    {html_escape(player["display"])}
+                </span>
+
+            </div>
+"""
+
+
+html += """
+        </div>
+
+
+        <div class="leaderboard">
+
+            <h3>Holds</h3>
+
+"""
+
+for player in leaderboards["Holds"]:
+
+    html += f"""
+            <div class="leaderboard-row">
+
+                <span>
+                    {html_escape(player["name"])},
+                    {html_escape(player["team"])}
+                </span>
+
+                <span>
+                    {html_escape(player["display"])}
+                </span>
+
+            </div>
+"""
+
+
+html += """
+        </div>
+
+    </div>
+
+</div>
+"""
 
     html += """
 <div class="games-grid">
