@@ -599,8 +599,39 @@ def make_pitching_table(
             continue
 
 
-        html_output += """
-                <tr>
+        # ----------------------------------------------------
+        # Games Started
+        #
+        # Column J in the spreadsheet is GS.
+        # Python uses zero-based numbering, so:
+        #
+        # Column A = row[0]
+        # Column B = row[1]
+        # Column C = row[2]
+        # ...
+        # Column J = row[9]
+        # ----------------------------------------------------
+
+        gs_value = 0
+
+
+        if len(row) > 9:
+
+            try:
+
+                gs_value = float(
+                    row[9].strip()
+                )
+
+            except ValueError:
+
+                gs_value = 0
+
+
+        html_output += f"""
+                <tr
+                    data-gs="{gs_value}"
+                >
         """
 
 
@@ -825,6 +856,69 @@ def make_page(
         margin: 0 0 20px 0;
     }
 
+       /* =========================
+       PAGE HEADER / FILTERS
+       ========================= */
+
+    .page-header {
+
+        display: flex;
+
+        align-items: baseline;
+
+        gap: 18px;
+
+        margin-bottom: 20px;
+    }
+
+
+    .page-header h1 {
+
+        margin: 0;
+    }
+
+
+    .pitcher-filters {
+
+        font-size: 16px;
+
+        white-space: nowrap;
+    }
+
+
+    .pitcher-filter {
+
+        border: none;
+
+        background: none;
+
+        padding: 0;
+
+        margin: 0;
+
+        font-family: inherit;
+
+        font-size: inherit;
+
+        cursor: pointer;
+
+        color: #777;
+    }
+
+
+    .pitcher-filter.active {
+
+        color: #111;
+
+        font-weight: 600;
+    }
+
+
+    .pitcher-filter:hover {
+
+        color: #111;
+    }
+
 
     /* =========================
        TABLE
@@ -1008,6 +1102,17 @@ def make_page(
             height: 25px;
         }
 
+        .page-header {
+
+            gap: 12px;
+        }
+
+
+        .pitcher-filters {
+
+            font-size: 14px;
+        }
+
     }
 
 </style>
@@ -1019,9 +1124,42 @@ def make_page(
 
 <div class="container">
 
-    <h1>
-        Pitching Stats
-    </h1>
+    <div class="page-header">
+
+        <h1>
+            Pitching Stats
+        </h1>
+
+        <div class="pitcher-filters">
+
+            <button
+                class="pitcher-filter active"
+                data-filter="all"
+            >
+                All
+            </button>
+
+            <span>|</span>
+
+            <button
+                class="pitcher-filter"
+                data-filter="starters"
+            >
+                Starters
+            </button>
+
+            <span>|</span>
+
+            <button
+                class="pitcher-filter"
+                data-filter="relievers"
+            >
+                Relievers
+            </button>
+
+        </div>
+
+    </div>
     """
 
 
@@ -1239,6 +1377,97 @@ document.addEventListener(
 
     }
 );
+
+        /* =========================
+           PITCHER FILTERS
+           ========================= */
+
+        const filterButtons =
+            document.querySelectorAll(
+                ".pitcher-filter"
+            );
+
+
+        filterButtons.forEach(
+            function(button) {
+
+                button.addEventListener(
+                    "click",
+                    function() {
+
+                        const filter =
+                            button.dataset.filter;
+
+
+                        filterButtons.forEach(
+                            function(other) {
+
+                                other.classList.remove(
+                                    "active"
+                                );
+
+                            }
+                        );
+
+
+                        button.classList.add(
+                            "active"
+                        );
+
+
+                        const rows =
+                            table.querySelectorAll(
+                                "tbody tr"
+                            );
+
+
+                        rows.forEach(
+                            function(row) {
+
+                                const gs =
+                                    parseFloat(
+                                        row.dataset.gs
+                                    ) || 0;
+
+
+                                let showRow = true;
+
+
+                                if (
+                                    filter ===
+                                    "starters"
+                                ) {
+
+                                    showRow =
+                                        gs >= 1;
+
+                                }
+
+
+                                if (
+                                    filter ===
+                                    "relievers"
+                                ) {
+
+                                    showRow =
+                                        gs === 0;
+
+                                }
+
+
+                                row.style.display =
+                                    showRow
+                                        ? ""
+                                        : "none";
+
+                            }
+                        );
+
+                    }
+                );
+
+            }
+        );
 
 </script>
 
