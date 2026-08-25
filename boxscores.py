@@ -2089,64 +2089,64 @@ html += """
 </div>
 """
 
-    html += """
+html += """
 <div class="games-grid">
 """
 
-    # Calculate season-to-date batting note totals.
-    get_note_season_totals(
-        games,
-        batting_by_game
+# Calculate season-to-date batting note totals.
+get_note_season_totals(
+    games,
+    batting_by_game
+)
+
+# Tracks season-to-date pitching records.
+records = {}
+
+for game in games:
+
+    game_id = game["game_id"]
+
+    batting_rows = batting_by_game.get(
+        game_id,
+        []
     )
 
-    # Tracks season-to-date pitching records.
-    records = {}
+    pitching_rows = pitching_by_game.get(
+        game_id,
+        []
+    )
 
-    for game in games:
+    linescore_rows = linescore_by_game.get(
+        game_id,
+        []
+    )
 
-        game_id = game["game_id"]
+    html += make_game_section(
+        game,
+        batting_rows,
+        pitching_rows,
+        records,
+        home_away_order,
+        linescore_rows
+    )
 
-        batting_rows = batting_by_game.get(
-            game_id,
-            []
+    # Update pitcher records AFTER generating
+    # the current game's box score.
+    for pitcher in pitching_rows:
+
+        decision = get_pitcher_decision(
+            pitcher
         )
 
-        pitching_rows = pitching_by_game.get(
-            game_id,
-            []
-        )
+        if decision:
 
-        linescore_rows = linescore_by_game.get(
-            game_id,
-            []
-        )
-
-        html += make_game_section(
-            game,
-            batting_rows,
-            pitching_rows,
-            records,
-            home_away_order,
-            linescore_rows
-        )
-
-        # Update pitcher records AFTER generating
-        # the current game's box score.
-        for pitcher in pitching_rows:
-
-            decision = get_pitcher_decision(
-                pitcher
+            update_pitcher_record(
+                records,
+                pitcher["pitcher"],
+                decision
             )
 
-            if decision:
-
-                update_pitcher_record(
-                    records,
-                    pitcher["pitcher"],
-                    decision
-                )
-
-    html += """
+html += """
 </div>
 
 </div>
@@ -2155,7 +2155,7 @@ html += """
 </html>
 """
 
-    return html
+return html
 
 def main():
 
