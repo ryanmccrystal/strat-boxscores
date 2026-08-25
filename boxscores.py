@@ -1852,7 +1852,11 @@ def main():
     player_positions = get_player_positions(
         batting_stats
     )
-
+    
+    batting_leaderboards = get_batting_leaderboards(
+        batting_stats
+    )
+    
     batting_by_game = get_batting_data(
         batting,
         player_positions
