@@ -2089,7 +2089,7 @@ html += """
 </div>
 """
 
-    html += """
+html += """
 <div class="games-grid">
 """
 
