@@ -599,40 +599,9 @@ def make_pitching_table(
             continue
 
 
-        # ----------------------------------------------------
-        # Games Started
-        #
-        # Column J in the spreadsheet is GS.
-        # Python uses zero-based numbering, so:
-        #
-        # Column A = row[0]
-        # Column B = row[1]
-        # Column C = row[2]
-        # ...
-        # Column J = row[9]
-        # ----------------------------------------------------
-
-        gs_value = 0
-
-
-        if len(row) > 9:
-
-            try:
-
-                gs_value = float(
-                    row[9].strip()
-                )
-
-            except ValueError:
-
-                gs_value = 0
-
-
-        html_output += f"""
-                <tr
-                    data-gs="{gs_value}"
-                >
-        """
+        html_output += """
+                        <tr>
+                """
 
 
         # ----------------------------------------------------
@@ -1396,13 +1365,19 @@ document.addEventListener(
                     function() {
 
                         const filter =
-                            button.dataset.filter;
+                            this.dataset.filter;
+
+
+                        const rows =
+                            document.querySelectorAll(
+                                "#pitching-stats-table tbody tr"
+                            );
 
 
                         filterButtons.forEach(
-                            function(other) {
+                            function(otherButton) {
 
-                                other.classList.remove(
+                                otherButton.classList.remove(
                                     "active"
                                 );
 
@@ -1410,55 +1385,64 @@ document.addEventListener(
                         );
 
 
-                        button.classList.add(
+                        this.classList.add(
                             "active"
                         );
-
-
-                        const rows =
-                            table.querySelectorAll(
-                                "tbody tr"
-                            );
 
 
                         rows.forEach(
                             function(row) {
 
+                                /*
+                                 * GS is the 11th visible
+                                 * column.
+                                 *
+                                 * JavaScript uses zero-based
+                                 * indexes, so column 11
+                                 * is index 10.
+                                 */
+
+                                const gsCell =
+                                    row.children[10];
+
+
                                 const gs =
                                     parseFloat(
-                                        row.dataset.gs
+                                        gsCell
+                                            .textContent
+                                            .trim()
                                     ) || 0;
 
 
-                                let showRow = true;
-
-
                                 if (
-                                    filter ===
-                                    "starters"
+                                    filter === "all"
                                 ) {
 
-                                    showRow =
-                                        gs >= 1;
+                                    row.style.display = "";
 
                                 }
 
-
-                                if (
-                                    filter ===
-                                    "relievers"
+                                else if (
+                                    filter === "starters"
                                 ) {
 
-                                    showRow =
-                                        gs === 0;
+                                    row.style.display =
+                                        gs >= 1
+                                            ? ""
+                                            : "none";
 
                                 }
 
+                                else if (
+                                    filter === "relievers"
+                                ) {
 
-                                row.style.display =
-                                    showRow
-                                        ? ""
-                                        : "none";
+                                    row.style.display =
+                                        gs === 0
+                                            ? ""
+                                            : "none";
+
+                                }
 
                             }
                         );
