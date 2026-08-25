@@ -1401,7 +1401,8 @@ def create_html(
     pitching_by_game,
     home_away_order,
     linescore_by_game,
-    standings_rows
+    standings_rows,
+    batting_leaderboards
 ):
 
     html = """<!DOCTYPE html>
@@ -1884,7 +1885,8 @@ def main():
         pitching_by_game,
         home_away_order,
         linescore_by_game,
-        standings_rows
+        standings_rows,
+        batting_leaderboards
     )
 
     with open(
