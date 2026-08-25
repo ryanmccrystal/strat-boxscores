@@ -101,6 +101,148 @@ def get_player_positions(batting_stats):
 
     return positions
 
+# ============================================================
+# BATTING LEADERBOARDS
+# ============================================================
+
+def get_batting_leaderboards(batting_stats):
+
+    rows = batting_stats.get_all_values()
+
+    if not rows:
+        return {}
+
+    header = rows[0]
+
+    # Map column names to their positions.
+    columns = {}
+
+    for index, value in enumerate(header):
+
+        columns[value.strip().upper()] = index
+
+    required_columns = {
+        "Team",
+        "Name",
+        "AVG",
+        "OPS",
+        "HR",
+        "RBI",
+        "SB"
+    }
+
+    for column in required_columns:
+
+        if column.upper() not in columns:
+
+            print(
+                f"Warning: batting column "
+                f"{column} not found."
+            )
+
+    def get_column(name):
+
+        return columns.get(
+            name.upper()
+        )
+
+    team_column = get_column("Team")
+    name_column = get_column("Name")
+    avg_column = get_column("AVG")
+    hr_column = get_column("HR")
+    rbi_column = get_column("RBI")
+    ops_column = get_column("OPS")
+    sb_column = get_column("SB")
+
+    def build_leaderboard(
+        stat_column,
+        reverse=True
+    ):
+
+        players = []
+
+        if stat_column is None:
+            return players
+
+        for row in rows[1:]:
+
+            if len(row) <= stat_column:
+                continue
+
+            name = (
+                row[name_column].strip()
+                if name_column is not None
+                and len(row) > name_column
+                else ""
+            )
+
+            team = (
+                row[team_column].strip()
+                if team_column is not None
+                and len(row) > team_column
+                else ""
+            )
+
+            value_text = row[
+                stat_column
+            ].strip()
+
+            if not name:
+                continue
+
+            # Never include Team Totals.
+            if name.lower() == "team totals":
+                continue
+
+            if not value_text:
+                continue
+
+            try:
+                value = float(value_text)
+
+            except ValueError:
+                continue
+
+            players.append(
+                {
+                    "name": name,
+                    "team": team,
+                    "value": value,
+                    "display": value_text
+                }
+            )
+
+        players.sort(
+            key=lambda player:
+                player["value"],
+            reverse=reverse
+        )
+
+        return players[:5]
+
+    return {
+
+        "BA": build_leaderboard(
+            avg_column
+        ),
+
+        "HR": build_leaderboard(
+            hr_column
+        ),
+
+        "RBI": build_leaderboard(
+            rbi_column
+        ),
+
+        "OPS": build_leaderboard(
+            ops_column
+        ),
+
+        "SB": build_leaderboard(
+            sb_column
+        )
+    }
+
 
 def get_batting_data(batting, player_positions):
     rows = batting.get_all_values()
