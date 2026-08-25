@@ -1429,6 +1429,7 @@ def make_standings_section(standings_rows):
     return html
 
 def create_html(
+    spreadsheet,
     games,
     batting_by_game,
     pitching_by_game,
@@ -2371,6 +2372,7 @@ def main():
     )
 
     html = create_html(
+        spreadsheet,
         games,
         batting_by_game,
         pitching_by_game,
