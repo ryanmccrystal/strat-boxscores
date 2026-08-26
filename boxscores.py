@@ -1761,14 +1761,14 @@ def create_html(
     }
     
     .leaderboard-player {
-        width: 72%;
+        width: 86%;
         text-align: left;
         white-space: nowrap;
     }
     
     .leaderboard-stat {
-        width: 28%;
-        text-align: left;
+        width: 14%;
+        text-align: center;
         white-space: nowrap;
     }
     
