@@ -119,6 +119,9 @@ def get_batting_leaderboards():
 
         rows = list(reader)
 
+        print("CSV columns:", reader.fieldnames)
+        print("First CSV row:", rows[0] if rows else "NO ROWS")
+
     def make_leaderboard(column):
 
         players = []
