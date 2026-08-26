@@ -1441,7 +1441,7 @@ def main():
     )
 
 
-        with open(
+    with open(
         OUTPUT_FILE,
         "w",
         encoding="utf-8"
