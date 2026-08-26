@@ -1636,7 +1636,8 @@ def create_html(
         font-weight: 600;
         margin: 0;
         padding: 2px 2px;
-        text-align: right;
+        border-bottom: 1px solid #222;
+        text-align: center;
     }
     
     .leaderboard-table {
@@ -1659,7 +1660,7 @@ def create_html(
     
     .leaderboard-table .leaderboard-stat {
         width: 25%;
-        text-align: right;
+        text-align: center;
     }
 
     /* =========================
