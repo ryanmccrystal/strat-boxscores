@@ -1693,14 +1693,163 @@ def create_html(
 <h1>Strat-o-Matic Box Scores</h1>
 """
 
-    # Add standings above the box scores.
-    html += make_standings_section(
-        standings_rows
-    )
-
-    html += """
-<div class="games-grid">
-"""
+        # Add standings above the box scores.
+        html += make_standings_section(
+            standings_rows
+        )
+    
+    
+        # ============================================================
+        # BATTING LEADERBOARDS
+        # ============================================================
+    
+        html += """
+    <div class="leaderboards">
+    
+        <div class="leaderboard">
+    
+            <h3>BA</h3>
+    """
+    
+    
+        for player in batting_leaderboards["BA"]:
+    
+            html += f"""
+            <div class="leaderboard-row">
+    
+                <span>
+                    {html_escape(player["name"])},
+                    {html_escape(player["team"])}
+                </span>
+    
+                <span>
+                    {html_escape(player["display"])}
+                </span>
+    
+            </div>
+    """
+    
+    
+        html += """
+        </div>
+    
+    
+        <div class="leaderboard">
+    
+            <h3>HR</h3>
+    """
+    
+    
+        for player in batting_leaderboards["HR"]:
+    
+            html += f"""
+            <div class="leaderboard-row">
+    
+                <span>
+                    {html_escape(player["name"])},
+                    {html_escape(player["team"])}
+                </span>
+    
+                <span>
+                    {html_escape(player["display"])}
+                </span>
+    
+            </div>
+    """
+    
+    
+        html += """
+        </div>
+    
+    
+        <div class="leaderboard">
+    
+            <h3>RBI</h3>
+    """
+    
+    
+        for player in batting_leaderboards["RBI"]:
+    
+            html += f"""
+            <div class="leaderboard-row">
+    
+                <span>
+                    {html_escape(player["name"])},
+                    {html_escape(player["team"])}
+                </span>
+    
+                <span>
+                    {html_escape(player["display"])}
+                </span>
+    
+            </div>
+    """
+    
+    
+        html += """
+        </div>
+    
+    
+        <div class="leaderboard">
+    
+            <h3>OPS</h3>
+    """
+    
+    
+        for player in batting_leaderboards["OPS"]:
+    
+            html += f"""
+            <div class="leaderboard-row">
+    
+                <span>
+                    {html_escape(player["name"])},
+                    {html_escape(player["team"])}
+                </span>
+    
+                <span>
+                    {html_escape(player["display"])}
+                </span>
+    
+            </div>
+    """
+    
+    
+        html += """
+        </div>
+    
+    
+        <div class="leaderboard">
+    
+            <h3>SB</h3>
+    """
+    
+    
+        for player in batting_leaderboards["SB"]:
+    
+            html += f"""
+            <div class="leaderboard-row">
+    
+                <span>
+                    {html_escape(player["name"])},
+                    {html_escape(player["team"])}
+                </span>
+    
+                <span>
+                    {html_escape(player["display"])}
+                </span>
+    
+            </div>
+    """
+    
+    
+        html += """
+        </div>
+    
+    </div>
+    
+    
+    <div class="games-grid">
+    """
 
     # Calculate season-to-date batting note totals.
     get_note_season_totals(
