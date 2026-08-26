@@ -1548,6 +1548,10 @@ def main():
             :last_column + 1
         ]
 
+        print("PITCHING COLUMNS:")
+        for i, column in enumerate(header, start=1):
+            print(i, repr(column))
+
 
         for row in data_rows:
 
@@ -1662,19 +1666,7 @@ def main():
     
         for player in all_players:
     
-            row = player["row"]
-
-        print(
-            "PITCHING TEST:",
-            player["team"],
-            row[1] if len(row) > 1 else "",
-            "COL8=", row[7] if len(row) > 7 else "",
-            "COL9=", row[8] if len(row) > 8 else "",
-            "COL14=", row[13] if len(row) > 13 else "",
-            "COL15=", row[14] if len(row) > 14 else "",
-            "COL23=", row[22] if len(row) > 22 else "",
-            "COL24=", row[23] if len(row) > 23 else ""
-        )        
+            row = player["row"]       
     
         # The spreadsheet columns supplied for the
         # pitching stats are 1-based:
@@ -1689,14 +1681,14 @@ def main():
         # Saves = row[13]
         # Strikeouts = row[22]
 
-        writer.writerow([
-            player["team"],
-            row[1].strip() if len(row) > 1 else "",
-            row[10].strip() if len(row) > 10 else "",
-            row[7].strip() if len(row) > 7 else "",
-            row[13].strip() if len(row) > 13 else "",
-            row[22].strip() if len(row) > 22 else ""
-        ])
+            writer.writerow([
+                player["team"],
+                row[1].strip() if len(row) > 1 else "",
+                row[10].strip() if len(row) > 10 else "",
+                row[7].strip() if len(row) > 7 else "",
+                row[13].strip() if len(row) > 13 else "",
+                row[22].strip() if len(row) > 22 else ""
+            ])
     
     print(
         f"Created {CSV_FILE} with "
