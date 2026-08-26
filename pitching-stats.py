@@ -1548,10 +1548,6 @@ def main():
             :last_column + 1
         ]
 
-        print("PITCHING COLUMNS:")
-        for i, column in enumerate(header, start=1):
-            print(i, repr(column))
-
 
         for row in data_rows:
 
@@ -1643,7 +1639,7 @@ def main():
     # ============================================================
     
     CSV_FILE = "pitching-stats.csv"
-    
+
     import csv
     
     with open(
@@ -1664,30 +1660,24 @@ def main():
             "Strikeouts"
         ])
     
+        # Find columns by their actual headers.
+        name_column = header.index("Name")
+        gs_column = header.index("GS")
+        era_column = header.index("ERA")
+        saves_column = header.index("S")
+        strikeouts_column = header.index("SO")
+    
         for player in all_players:
     
-            row = player["row"]       
+            row = player["row"]
     
-        # The spreadsheet columns supplied for the
-        # pitching stats are 1-based:
-        #
-        # ERA = column 8
-        # Saves = column 14
-        # Strikeouts = column 23
-        #
-        # Python uses zero-based indexes, so:
-        #
-        # ERA = row[7]
-        # Saves = row[13]
-        # Strikeouts = row[22]
-
             writer.writerow([
                 player["team"],
-                row[1].strip() if len(row) > 1 else "",
-                row[10].strip() if len(row) > 10 else "",
-                row[7].strip() if len(row) > 7 else "",
-                row[13].strip() if len(row) > 13 else "",
-                row[22].strip() if len(row) > 22 else ""
+                row[name_column].strip(),
+                row[gs_column].strip(),
+                row[era_column].strip(),
+                row[saves_column].strip(),
+                row[strikeouts_column].strip()
             ])
     
     print(
