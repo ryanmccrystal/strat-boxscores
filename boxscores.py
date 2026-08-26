@@ -120,7 +120,11 @@ def get_batting_leaderboards():
         rows = list(reader)
 
         print("CSV columns:", reader.fieldnames)
-        print("First CSV row:", rows[0] if rows else "NO ROWS")
+        print("First 5 CSV rows:")
+
+        for row in rows[:5]:
+        
+            print(row)
 
     def make_leaderboard(column):
 
