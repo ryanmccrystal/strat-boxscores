@@ -201,6 +201,11 @@ def get_pitching_leaderboards():
 
         rows = list(reader)
 
+        print(
+            "Pitching CSV columns:",
+            reader.fieldnames
+        )
+
     # --------------------------------------------------------
     # ERA — starters only
     # --------------------------------------------------------
@@ -212,10 +217,11 @@ def get_pitching_leaderboards():
         try:
             gs = float(row["GS"])
             era = float(row["ERA"])
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, KeyError):
             continue
 
         if gs >= 1:
+
             era_rows.append(
                 {
                     "name": row["Name"],
@@ -229,7 +235,7 @@ def get_pitching_leaderboards():
         key=lambda player: player["value"]
     )
 
-    leaderboards["ERA"] = era_rows[:10]
+    leaderboards["ERA"] = era_rows[:5]
 
     # --------------------------------------------------------
     # Strikeouts
@@ -243,7 +249,7 @@ def get_pitching_leaderboards():
             strikeouts = float(
                 row["Strikeouts"]
             )
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, KeyError):
             continue
 
         strikeout_rows.append(
@@ -261,7 +267,7 @@ def get_pitching_leaderboards():
     )
 
     leaderboards["Strikeouts"] = (
-        strikeout_rows[:10]
+        strikeout_rows[:5]
     )
 
     # --------------------------------------------------------
@@ -276,7 +282,7 @@ def get_pitching_leaderboards():
             saves = float(
                 row["Saves"]
             )
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, KeyError):
             continue
 
         save_rows.append(
@@ -293,10 +299,9 @@ def get_pitching_leaderboards():
         reverse=True
     )
 
-    leaderboards["Saves"] = save_rows[:10]
+    leaderboards["Saves"] = save_rows[:5]
 
     return leaderboards
-
 
 def get_batting_data(batting, player_positions):
     rows = batting.get_all_values()
@@ -1737,7 +1742,7 @@ def create_html(
     
     .leaderboards {
         display: grid;
-        grid-template-columns: repeat(5, minmax(0, 1fr));
+        grid-template-columns: repeat(8, minmax(0, 1fr));
         gap: 18px;
         margin-bottom: 18px;
         max-width: 1100px;
