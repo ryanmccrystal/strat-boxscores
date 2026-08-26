@@ -1,6 +1,7 @@
 import os
 import json
 import re
+import csv
 import gspread
 from google.oauth2.service_account import Credentials
 
@@ -105,96 +106,41 @@ def get_player_positions(batting_stats):
 # BATTING LEADERBOARDS
 # ============================================================
 
-def get_batting_leaderboards(batting_stats):
+def get_batting_leaderboards():
 
-    rows = batting_stats.get_all_values()
+    with open(
+        "batting-stats.csv",
+        "r",
+        newline="",
+        encoding="utf-8"
+    ) as csv_file:
 
-    if not rows:
-        return {}
+        reader = csv.DictReader(csv_file)
 
-    header = rows[0]
+        rows = list(reader)
 
-    # Map column names to their positions.
-    columns = {}
-
-    for index, value in enumerate(header):
-
-        columns[value.strip().upper()] = index
-
-    required_columns = {
-        "Team",
-        "Name",
-        "AVG",
-        "OPS",
-        "HR",
-        "RBI",
-        "SB"
-    }
-
-    for column in required_columns:
-
-        if column.upper() not in columns:
-
-            print(
-                f"Warning: batting column "
-                f"{column} not found."
-            )
-
-    def get_column(name):
-
-        return columns.get(
-            name.upper()
-        )
-
-    team_column = get_column("Team")
-    name_column = get_column("Name")
-    avg_column = get_column("AVG")
-    hr_column = get_column("HR")
-    rbi_column = get_column("RBI")
-    ops_column = get_column("OPS")
-    sb_column = get_column("SB")
-
-    def build_leaderboard(
-        stat_column,
-        reverse=True
-    ):
+    def make_leaderboard(column):
 
         players = []
 
-        if stat_column is None:
-            return players
+        for row in rows:
 
-        for row in rows[1:]:
+            name = row.get(
+                "Name",
+                ""
+            ).strip()
 
-            if len(row) <= stat_column:
-                continue
+            team = row.get(
+                "Team",
+                ""
+            ).strip()
 
-            name = (
-                row[name_column].strip()
-                if name_column is not None
-                and len(row) > name_column
-                else ""
-            )
+            value_text = row.get(
+                column,
+                ""
+            ).strip()
 
-            team = (
-                row[team_column].strip()
-                if team_column is not None
-                and len(row) > team_column
-                else ""
-            )
-
-            value_text = row[
-                stat_column
-            ].strip()
-
-            if not name:
-                continue
-
-            # Never include Team Totals.
-            if name.lower() == "team totals":
-                continue
-
-            if not value_text:
+            if not name or not value_text:
                 continue
 
             try:
@@ -203,44 +149,26 @@ def get_batting_leaderboards(batting_stats):
             except ValueError:
                 continue
 
-            players.append(
-                {
-                    "name": name,
-                    "team": team,
-                    "value": value,
-                    "display": value_text
-                }
-            )
+            players.append({
+                "name": name,
+                "team": team,
+                "value": value,
+                "display": value_text
+            })
 
         players.sort(
-            key=lambda player:
-                player["value"],
-            reverse=reverse
+            key=lambda player: player["value"],
+            reverse=True
         )
 
         return players[:5]
 
     return {
-
-        "BA": build_leaderboard(
-            avg_column
-        ),
-
-        "HR": build_leaderboard(
-            hr_column
-        ),
-
-        "RBI": build_leaderboard(
-            rbi_column
-        ),
-
-        "OPS": build_leaderboard(
-            ops_column
-        ),
-
-        "SB": build_leaderboard(
-            sb_column
-        )
+        "BA": make_leaderboard("AVG"),
+        "HR": make_leaderboard("HR"),
+        "RBI": make_leaderboard("RBI"),
+        "OPS": make_leaderboard("OPS"),
+        "SB": make_leaderboard("SB")
     }
 
 
@@ -1854,9 +1782,7 @@ def main():
         batting_stats
     )
     
-    batting_leaderboards = get_batting_leaderboards(
-        batting_stats
-    )
+    batting_leaderboards = get_batting_leaderboards()
     
     batting_by_game = get_batting_data(
         batting,
