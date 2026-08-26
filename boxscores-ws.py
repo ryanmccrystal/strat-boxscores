@@ -1382,7 +1382,7 @@ h1 {
 
 .game {
     margin: 0;
-    padding: 12px;
+    padding: 0;
     border: none;
     font-size: 12px;
     min-width: 0;
