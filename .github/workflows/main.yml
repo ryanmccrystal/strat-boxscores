@@ -30,6 +30,7 @@ jobs:
         run: |
           python batting-stats.py
           python pitching-stats.py
+          python boxscores-ws.py
           python boxscores.py
           python team-stats.py
 
