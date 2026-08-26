@@ -1634,6 +1634,63 @@ def main():
         f"with {len(all_players)} pitchers."
     )
 
+    # ============================================================
+    # SAVE PROCESSED PITCHING DATA FOR OTHER PAGES
+    # ============================================================
+    
+    CSV_FILE = "pitching-stats.csv"
+    
+    import csv
+    
+    with open(
+        CSV_FILE,
+        "w",
+        newline="",
+        encoding="utf-8"
+    ) as csv_file:
+    
+        writer = csv.writer(csv_file)
+    
+        writer.writerow([
+            "Team",
+            "Name",
+            "GS",
+            "ERA",
+            "Saves",
+            "Strikeouts"
+        ])
+    
+        for player in all_players:
+    
+            row = player["row"]
+    
+            # The spreadsheet columns supplied for the
+            # pitching stats are 1-based:
+            #
+            # ERA = column 8
+            # Saves = column 14
+            # Strikeouts = column 23
+            #
+            # Python uses zero-based indexes, so:
+            #
+            # ERA = row[7]
+            # Saves = row[13]
+            # Strikeouts = row[22]
+    
+            writer.writerow([
+                player["team"],
+                row[1].strip() if len(row) > 1 else "",
+                row[10].strip() if len(row) > 10 else "",
+                row[7].strip() if len(row) > 7 else "",
+                row[13].strip() if len(row) > 13 else "",
+                row[22].strip() if len(row) > 22 else ""
+            ])
+    
+    print(
+        f"Created {CSV_FILE} with "
+        f"{len(all_players)} pitchers."
+    )
+
 
 if __name__ == "__main__":
 
