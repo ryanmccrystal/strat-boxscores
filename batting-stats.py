@@ -1441,7 +1441,7 @@ def main():
     )
 
 
-    with open(
+        with open(
         OUTPUT_FILE,
         "w",
         encoding="utf-8"
@@ -1452,8 +1452,107 @@ def main():
         )
 
 
+    # ============================================================
+    # SAVE PROCESSED BATTING DATA FOR OTHER PAGES
+    # ============================================================
+
+    CSV_FILE = "batting-stats.csv"
+
+    with open(
+        CSV_FILE,
+        "w",
+        newline="",
+        encoding="utf-8"
+    ) as csv_file:
+
+        writer = csv.writer(csv_file)
+
+        writer.writerow([
+            "Team",
+            "LOGO",
+            "Name",
+            "Real Tm",
+            "POS",
+            "AVG",
+            "OBP",
+            "SLG",
+            "OPS",
+            "G",
+            "PA",
+            "AB",
+            "R",
+            "H",
+            "2b",
+            "3b",
+            "HR",
+            "RBI",
+            "XBH",
+            "TB",
+            "SB",
+            "CS",
+            "SO",
+            "BB",
+            "HBP",
+            "GIDP",
+            "OPS+",
+            "WOBA",
+            "BABIP",
+            "K%",
+            "BB%",
+            "AB/HR",
+            "ISO",
+            "WRC+",
+            "RC/G"
+        ])
+
+        for player in all_players:
+
+            writer.writerow([
+                player.get("team", ""),
+                player.get("logo_url", ""),
+                player.get("name", ""),
+                player.get("real_team", ""),
+                player.get("position", ""),
+                player.get("avg", ""),
+                player.get("obp", ""),
+                player.get("slg", ""),
+                player.get("ops", ""),
+                player.get("g", ""),
+                player.get("pa", ""),
+                player.get("ab", ""),
+                player.get("r", ""),
+                player.get("h", ""),
+                player.get("2b", ""),
+                player.get("3b", ""),
+                player.get("hr", ""),
+                player.get("rbi", ""),
+                player.get("xbh", ""),
+                player.get("tb", ""),
+                player.get("sb", ""),
+                player.get("cs", ""),
+                player.get("so", ""),
+                player.get("bb", ""),
+                player.get("hbp", ""),
+                player.get("gidp", ""),
+                player.get("ops_plus", ""),
+                player.get("woba", ""),
+                player.get("babip", ""),
+                player.get("k_pct", ""),
+                player.get("bb_pct", ""),
+                player.get("ab_hr", ""),
+                player.get("iso", ""),
+                player.get("wrc_plus", ""),
+                player.get("rc_g", "")
+            ])
+
+
     print(
         f"Created {OUTPUT_FILE} "
+        f"with {len(all_players)} players."
+    )
+
+    print(
+        f"Created {CSV_FILE} "
         f"with {len(all_players)} players."
     )
 
@@ -1461,101 +1560,3 @@ def main():
 if __name__ == "__main__":
 
     main()
-
-# ============================================================
-# SAVE PROCESSED BATTING DATA FOR OTHER PAGES
-# ============================================================
-
-CSV_FILE = "batting-stats.csv"
-
-with open(
-    CSV_FILE,
-    "w",
-    newline="",
-    encoding="utf-8"
-) as csv_file:
-
-    writer = csv.writer(csv_file)
-
-    writer.writerow([
-        "Team",
-        "LOGO",
-        "Name",
-        "Real Tm",
-        "POS",
-        "AVG",
-        "OBP",
-        "SLG",
-        "OPS",
-        "G",
-        "PA",
-        "AB",
-        "R",
-        "H",
-        "2b",
-        "3b",
-        "HR",
-        "RBI",
-        "XBH",
-        "TB",
-        "SB",
-        "CS",
-        "SO",
-        "BB",
-        "HBP",
-        "GIDP",
-        "OPS+",
-        "WOBA",
-        "BABIP",
-        "K%",
-        "BB%",
-        "AB/HR",
-        "ISO",
-        "WRC+",
-        "RC/G"
-    ])
-
-    for player in all_players:
-
-        writer.writerow([
-            player.get("team", ""),
-            player.get("logo_url", ""),
-            player.get("name", ""),
-            player.get("real_team", ""),
-            player.get("position", ""),
-            player.get("avg", ""),
-            player.get("obp", ""),
-            player.get("slg", ""),
-            player.get("ops", ""),
-            player.get("g", ""),
-            player.get("pa", ""),
-            player.get("ab", ""),
-            player.get("r", ""),
-            player.get("h", ""),
-            player.get("2b", ""),
-            player.get("3b", ""),
-            player.get("hr", ""),
-            player.get("rbi", ""),
-            player.get("xbh", ""),
-            player.get("tb", ""),
-            player.get("sb", ""),
-            player.get("cs", ""),
-            player.get("so", ""),
-            player.get("bb", ""),
-            player.get("hbp", ""),
-            player.get("gidp", ""),
-            player.get("ops_plus", ""),
-            player.get("woba", ""),
-            player.get("babip", ""),
-            player.get("k_pct", ""),
-            player.get("bb_pct", ""),
-            player.get("ab_hr", ""),
-            player.get("iso", ""),
-            player.get("wrc_plus", ""),
-            player.get("rc_g", "")
-        ])
-
-print(
-    f"Created {CSV_FILE} with "
-    f"{len(all_players)} players."
-)
