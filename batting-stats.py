@@ -1506,43 +1506,72 @@ def main():
         ])
 
         for player in all_players:
-
+    
+            row = player["row"]
+            header = player["header"]
+            team = player["team"]
+    
+            # Create a lookup from column name to column position.
+            column_map = {}
+    
+            for index, column in enumerate(header):
+    
+                column_map[
+                    column.strip()
+                ] = index
+    
+    
+            def get_value(column_name):
+    
+                index = column_map.get(
+                    column_name
+                )
+    
+                if index is None:
+                    return ""
+    
+                if index >= len(row):
+                    return ""
+    
+                return row[index].strip()
+    
+    
             writer.writerow([
-                player.get("team", ""),
-                player.get("logo_url", ""),
-                player.get("name", ""),
-                player.get("real_team", ""),
-                player.get("position", ""),
-                player.get("avg", ""),
-                player.get("obp", ""),
-                player.get("slg", ""),
-                player.get("ops", ""),
-                player.get("g", ""),
-                player.get("pa", ""),
-                player.get("ab", ""),
-                player.get("r", ""),
-                player.get("h", ""),
-                player.get("2b", ""),
-                player.get("3b", ""),
-                player.get("hr", ""),
-                player.get("rbi", ""),
-                player.get("xbh", ""),
-                player.get("tb", ""),
-                player.get("sb", ""),
-                player.get("cs", ""),
-                player.get("so", ""),
-                player.get("bb", ""),
-                player.get("hbp", ""),
-                player.get("gidp", ""),
-                player.get("ops_plus", ""),
-                player.get("woba", ""),
-                player.get("babip", ""),
-                player.get("k_pct", ""),
-                player.get("bb_pct", ""),
-                player.get("ab_hr", ""),
-                player.get("iso", ""),
-                player.get("wrc_plus", ""),
-                player.get("rc_g", "")
+                team,
+                "",
+                get_value("Name"),
+                get_value("Real Tm"),
+                get_value("POS"),
+                get_value("AVG"),
+                get_value("OBP"),
+                get_value("SLG"),
+                get_value("OPS"),
+                get_value("G"),
+                get_value("PA"),
+                get_value("AB"),
+                get_value("R"),
+                get_value("H"),
+                get_value("2b"),
+                get_value("3b"),
+                get_value("HR"),
+                get_value("RBI"),
+                get_value("XBH"),
+                get_value("TB"),
+                get_value("SB"),
+                get_value("CS"),
+                get_value("SO"),
+                get_value("BB"),
+                get_value("HBP"),
+                get_value("GIDP"),
+                get_value("OPS+"),
+                get_value("WOBA"),
+                get_value("BABIP"),
+                get_value("K%"),
+                get_value("BB%"),
+                get_value("AB/HR"),
+                get_value("ISO"),
+                get_value("WRC+"),
+                get_value("RC/G")
             ])
 
 
