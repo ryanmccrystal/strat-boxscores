@@ -2055,6 +2055,111 @@ def create_html(
 
     </div>
 
+
+    <div class="leaderboard">
+
+        <h3>ERA</h3>
+
+        <table class="leaderboard-table">
+"""
+
+    for player in pitching_leaderboards["ERA"]:
+
+        team_code = TEAM_CODES.get(
+            player["team"],
+            player["team"]
+        )
+
+        html += f"""
+        <tr>
+
+            <td class="leaderboard-player">
+                {html_escape(player["name"])},
+                {html_escape(team_code)}
+            </td>
+
+            <td class="leaderboard-stat">
+                {html_escape(player["display"])}
+            </td>
+
+        </tr>
+"""
+
+    html += """
+        </table>
+
+    </div>
+
+
+    <div class="leaderboard">
+
+        <h3>Strikeouts</h3>
+
+        <table class="leaderboard-table">
+"""
+
+    for player in pitching_leaderboards["Strikeouts"]:
+
+        team_code = TEAM_CODES.get(
+            player["team"],
+            player["team"]
+        )
+
+        html += f"""
+        <tr>
+
+            <td class="leaderboard-player">
+                {html_escape(player["name"])},
+                {html_escape(team_code)}
+            </td>
+
+            <td class="leaderboard-stat">
+                {html_escape(player["display"])}
+            </td>
+
+        </tr>
+"""
+
+    html += """
+        </table>
+
+    </div>
+
+
+    <div class="leaderboard">
+
+        <h3>Saves</h3>
+
+        <table class="leaderboard-table">
+"""
+
+    for player in pitching_leaderboards["Saves"]:
+
+        team_code = TEAM_CODES.get(
+            player["team"],
+            player["team"]
+        )
+
+        html += f"""
+        <tr>
+
+            <td class="leaderboard-player">
+                {html_escape(player["name"])},
+                {html_escape(team_code)}
+            </td>
+
+            <td class="leaderboard-stat">
+                {html_escape(player["display"])}
+            </td>
+
+        </tr>
+"""
+
+    html += """
+        </table>
+
+    </div>
+
 </div>
 
 
