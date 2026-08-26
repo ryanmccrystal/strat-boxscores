@@ -1768,170 +1768,180 @@ def create_html(
     <div class="leaderboard">
 
         <h3>BA</h3>
-"""
 
+        <table class="leaderboard-table">
+"""
 
     for player in batting_leaderboards["BA"]:
 
+        team_code = TEAM_CODES.get(
+            player["team"],
+            player["team"]
+        )
+
         html += f"""
-        <div class="leaderboard">
+        <tr>
 
-            <h3>BA</h3>
-        
-            <table class="leaderboard-table">
-        """
-
-            <span>
+            <td class="leaderboard-player">
                 {html_escape(player["name"])},
-                {html_escape(TEAM_CODES.get(player["team"], player["team"]))}
-            </span>
+                {html_escape(team_code)}
+            </td>
 
-            <span>
+            <td class="leaderboard-stat">
                 {html_escape(player["display"])}
-            </span>
+            </td>
 
-        </div>
+        </tr>
 """
 
-
     html += """
+        </table>
+
     </div>
 
 
     <div class="leaderboard">
 
         <h3>HR</h3>
-"""
 
+        <table class="leaderboard-table">
+"""
 
     for player in batting_leaderboards["HR"]:
 
+        team_code = TEAM_CODES.get(
+            player["team"],
+            player["team"]
+        )
+
         html += f"""
-        <div class="leaderboard">
+        <tr>
 
-            <h3>BA</h3>
-        
-            <table class="leaderboard-table">
-        """
-
-            <span>
+            <td class="leaderboard-player">
                 {html_escape(player["name"])},
-                {html_escape(TEAM_CODES.get(player["team"], player["team"]))}
-            </span>
+                {html_escape(team_code)}
+            </td>
 
-            <span>
+            <td class="leaderboard-stat">
                 {html_escape(player["display"])}
-            </span>
+            </td>
 
-        </div>
+        </tr>
 """
 
-
     html += """
+        </table>
+
     </div>
 
 
     <div class="leaderboard">
 
         <h3>RBI</h3>
-"""
 
+        <table class="leaderboard-table">
+"""
 
     for player in batting_leaderboards["RBI"]:
 
+        team_code = TEAM_CODES.get(
+            player["team"],
+            player["team"]
+        )
+
         html += f"""
-        <div class="leaderboard">
+        <tr>
 
-            <h3>BA</h3>
-        
-            <table class="leaderboard-table">
-        """
-
-            <span>
+            <td class="leaderboard-player">
                 {html_escape(player["name"])},
-                {html_escape(TEAM_CODES.get(player["team"], player["team"]))}
-            </span>
+                {html_escape(team_code)}
+            </td>
 
-            <span>
+            <td class="leaderboard-stat">
                 {html_escape(player["display"])}
-            </span>
+            </td>
 
-        </div>
+        </tr>
 """
 
-
     html += """
+        </table>
+
     </div>
 
 
     <div class="leaderboard">
 
         <h3>OPS</h3>
-"""
 
+        <table class="leaderboard-table">
+"""
 
     for player in batting_leaderboards["OPS"]:
 
+        team_code = TEAM_CODES.get(
+            player["team"],
+            player["team"]
+        )
+
         html += f"""
-        <div class="leaderboard">
+        <tr>
 
-            <h3>BA</h3>
-        
-            <table class="leaderboard-table">
-        """
-
-            <span>
+            <td class="leaderboard-player">
                 {html_escape(player["name"])},
-                {html_escape(TEAM_CODES.get(player["team"], player["team"]))}
-            </span>
+                {html_escape(team_code)}
+            </td>
 
-            <span>
+            <td class="leaderboard-stat">
                 {html_escape(player["display"])}
-            </span>
+            </td>
 
-        </div>
+        </tr>
 """
 
-
     html += """
+        </table>
+
     </div>
 
 
     <div class="leaderboard">
 
         <h3>SB</h3>
-"""
 
+        <table class="leaderboard-table">
+"""
 
     for player in batting_leaderboards["SB"]:
 
+        team_code = TEAM_CODES.get(
+            player["team"],
+            player["team"]
+        )
+
         html += f"""
-        <div class="leaderboard">
+        <tr>
 
-            <h3>BA</h3>
-        
-            <table class="leaderboard-table">
-        """
-
-            <span>
+            <td class="leaderboard-player">
                 {html_escape(player["name"])},
-                {html_escape(TEAM_CODES.get(player["team"], player["team"]))}
-            </span>
+                {html_escape(team_code)}
+            </td>
 
-            <span>
+            <td class="leaderboard-stat">
                 {html_escape(player["display"])}
-            </span>
+            </td>
 
-        </div>
+        </tr>
 """
 
-
     html += """
+        </table>
+
     </div>
 
 </div>
-    
-    
+
+
 <div class="games-grid">
 """
 
