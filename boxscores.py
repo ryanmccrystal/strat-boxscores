@@ -1742,11 +1742,9 @@ def create_html(
     
     .leaderboards {
         display: grid;
-        grid-template-columns: repeat(8, minmax(0, 1fr));
-        gap: 18px;
-        margin-bottom: 18px;
-        max-width: 1100px;
-        min-width: 0;
+        grid-template-columns: repeat(8, minmax(150px, 1fr));
+        gap: 20px;
+        margin-bottom: 22px;
     }
     
     .leaderboard {
@@ -1762,11 +1760,16 @@ def create_html(
         text-align: left;
     }
     
-    .leaderboard-table {
-        width: 100%;
-        border-collapse: collapse;
-        table-layout: fixed;
-        font-size: 14px;
+    .leaderboard-player {
+        width: 72%;
+        text-align: left;
+        white-space: nowrap;
+    }
+    
+    .leaderboard-stat {
+        width: 28%;
+        text-align: left;
+        white-space: nowrap;
     }
     
     .leaderboard-table td {
