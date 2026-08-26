@@ -1742,50 +1742,39 @@ def create_html(
     
     .leaderboards {
         display: grid;
-        grid-template-columns: repeat(8, minmax(150px, 1fr));
+        grid-template-columns: repeat(8, 1fr);
         gap: 20px;
         margin-bottom: 22px;
     }
     
     .leaderboard {
-        font-size: 14px;
+        width: 100%;
+        min-width: 0;
     }
     
     .leaderboard h3 {
+        margin: 0 0 4px 0;
         font-size: 14px;
         font-weight: 600;
-        margin: 0;
-        padding: 2px 2px;
-        border-bottom: 1px solid #222;
-        text-align: left;
+    }
+    
+    .leaderboard-table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+        font-size: 14px;
     }
     
     .leaderboard-player {
-        width: 86%;
-        text-align: left;
-        white-space: nowrap;
-    }
-    
-    .leaderboard-stat {
-        width: 14%;
-        text-align: center;
-        white-space: nowrap;
-    }
-    
-    .leaderboard-table td {
-        padding: 2px 2px;
-        line-height: 1.05;
-    }
-    
-    .leaderboard-table .leaderboard-player {
         width: 75%;
         text-align: left;
         white-space: nowrap;
     }
     
-    .leaderboard-table .leaderboard-stat {
+    .leaderboard-stat {
         width: 25%;
-        text-align: center;
+        text-align: left;
+        white-space: nowrap;
     }
 
     /* =========================
