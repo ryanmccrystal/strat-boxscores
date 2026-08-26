@@ -1522,6 +1522,10 @@ h1 {
     line-height: 1.25;
 }
 
+.ws-game-wrapper {
+    min-width: 0;
+}
+
 .ws-game-title {
     font-size: 17px;
     font-weight: 700;
@@ -1649,13 +1653,17 @@ h1 {
             "WS",
             ""
         )
-    
+
+        html += """
+        <div class="ws-game-wrapper">
+        """
+
         html += f"""
         <div class="ws-game-title">
             Game {html_escape(ws_number)}
         </div>
         """
-    
+
         html += make_game_section(
             game,
             batting_rows,
@@ -1664,6 +1672,10 @@ h1 {
             home_away_order,
             linescore_rows
         )
+
+        html += """
+        </div>
+        """
 
         for pitcher in pitching_rows:
 
