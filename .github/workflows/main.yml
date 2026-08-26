@@ -28,11 +28,15 @@ jobs:
         env:
           GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
         run: |
-          python batting-stats.py
-          python pitching-stats.py
-          python boxscores-ws.py
           python boxscores.py
+          sleep 10
+          python boxscores-ws.py
+          sleep 10
           python team-stats.py
+          sleep 10
+          python batting-stats.py
+          sleep 10
+          python pitching-stats.py
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
