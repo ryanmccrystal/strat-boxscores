@@ -1637,7 +1637,7 @@ def create_html(
         margin: 0;
         padding: 2px 2px;
         border-bottom: 1px solid #222;
-        text-align: center;
+        text-align: left;
     }
     
     .leaderboard-table {
@@ -1767,7 +1767,7 @@ def create_html(
 
     <div class="leaderboard">
 
-        <h3>BA</h3>
+        <h3>Batting Average</h3>
 
         <table class="leaderboard-table">
 """
@@ -1802,7 +1802,7 @@ def create_html(
 
     <div class="leaderboard">
 
-        <h3>HR</h3>
+        <h3>Home Runs</h3>
 
         <table class="leaderboard-table">
 """
@@ -1907,7 +1907,7 @@ def create_html(
 
     <div class="leaderboard">
 
-        <h3>SB</h3>
+        <h3>Stolen Bases</h3>
 
         <table class="leaderboard-table">
 """
