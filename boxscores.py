@@ -25,6 +25,10 @@ TEAM_NICKNAMES = {
     "Dunedin Blue Jays": "Blue Jays",
 }
 
+TEAM_CODES = {
+    value: key
+    for key, value in TEAM_NAMES.items()
+}
 
 def get_google_sheet():
     scopes = [
@@ -1612,6 +1616,54 @@ def create_html(
     }
 
     /* =========================
+       LEADERBOARDS
+       ========================= */
+    
+    .leaderboards {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 18px;
+        margin-bottom: 18px;
+        max-width: 1100px;
+    }
+    
+    .leaderboard {
+        font-size: 14px;
+    }
+    
+    .leaderboard h3 {
+        font-size: 14px;
+        font-weight: 600;
+        margin: 0;
+        padding: 2px 2px;
+        border-top: 1px solid #222;
+        border-bottom: 1px solid #222;
+    }
+    
+    .leaderboard-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        font-size: 14px;
+    }
+    
+    .leaderboard-table td {
+        padding: 2px 2px;
+        line-height: 1.05;
+    }
+    
+    .leaderboard-table .leaderboard-player {
+        width: 75%;
+        text-align: left;
+        white-space: nowrap;
+    }
+    
+    .leaderboard-table .leaderboard-stat {
+        width: 25%;
+        text-align: right;
+    }
+
+    /* =========================
        RESPONSIVE LAYOUT
        ========================= */
 
@@ -1722,11 +1774,16 @@ def create_html(
     for player in batting_leaderboards["BA"]:
 
         html += f"""
-        <div class="leaderboard-row">
+        <div class="leaderboard">
+
+            <h3>BA</h3>
+        
+            <table class="leaderboard-table">
+        """
 
             <span>
                 {html_escape(player["name"])},
-                {html_escape(player["team"])}
+                {html_escape(TEAM_CODES.get(player["team"], player["team"]))}
             </span>
 
             <span>
@@ -1750,11 +1807,16 @@ def create_html(
     for player in batting_leaderboards["HR"]:
 
         html += f"""
-        <div class="leaderboard-row">
+        <div class="leaderboard">
+
+            <h3>BA</h3>
+        
+            <table class="leaderboard-table">
+        """
 
             <span>
                 {html_escape(player["name"])},
-                {html_escape(player["team"])}
+                {html_escape(TEAM_CODES.get(player["team"], player["team"]))}
             </span>
 
             <span>
@@ -1778,11 +1840,16 @@ def create_html(
     for player in batting_leaderboards["RBI"]:
 
         html += f"""
-        <div class="leaderboard-row">
+        <div class="leaderboard">
+
+            <h3>BA</h3>
+        
+            <table class="leaderboard-table">
+        """
 
             <span>
                 {html_escape(player["name"])},
-                {html_escape(player["team"])}
+                {html_escape(TEAM_CODES.get(player["team"], player["team"]))}
             </span>
 
             <span>
@@ -1806,11 +1873,16 @@ def create_html(
     for player in batting_leaderboards["OPS"]:
 
         html += f"""
-        <div class="leaderboard-row">
+        <div class="leaderboard">
+
+            <h3>BA</h3>
+        
+            <table class="leaderboard-table">
+        """
 
             <span>
                 {html_escape(player["name"])},
-                {html_escape(player["team"])}
+                {html_escape(TEAM_CODES.get(player["team"], player["team"]))}
             </span>
 
             <span>
@@ -1834,11 +1906,16 @@ def create_html(
     for player in batting_leaderboards["SB"]:
 
         html += f"""
-        <div class="leaderboard-row">
+        <div class="leaderboard">
+
+            <h3>BA</h3>
+        
+            <table class="leaderboard-table">
+        """
 
             <span>
                 {html_escape(player["name"])},
-                {html_escape(player["team"])}
+                {html_escape(TEAM_CODES.get(player["team"], player["team"]))}
             </span>
 
             <span>
