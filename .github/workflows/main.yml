@@ -24,19 +24,24 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Generate stats and box scores
+      - name: Generate stats data
+        env:
+          GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
+        run: |
+          python batting-stats.py
+          sleep 30
+          python pitching-stats.py
+          sleep 30
+
+      - name: Generate box scores and team stats
         env:
           GOOGLE_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_SERVICE_ACCOUNT }}
         run: |
           python boxscores.py
-          sleep 10
+          sleep 30
           python boxscores-ws.py
-          sleep 10
+          sleep 30
           python team-stats.py
-          sleep 10
-          python batting-stats.py
-          sleep 10
-          python pitching-stats.py
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
