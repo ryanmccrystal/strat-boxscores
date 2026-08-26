@@ -1663,18 +1663,6 @@ def main():
         for player in all_players:
     
             row = player["row"]
-
-            print(
-                "PITCHING TEST:",
-                player["team"],
-                row[1] if len(row) > 1 else "",
-                "COL8=", row[7] if len(row) > 7 else "",
-                "COL9=", row[8] if len(row) > 8 else "",
-                "COL14=", row[13] if len(row) > 13 else "",
-                "COL15=", row[14] if len(row) > 14 else "",
-                "COL23=", row[22] if len(row) > 22 else "",
-                "COL24=", row[23] if len(row) > 23 else ""
-            )
     
             # The spreadsheet columns supplied for the
             # pitching stats are 1-based:
