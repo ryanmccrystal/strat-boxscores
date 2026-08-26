@@ -1746,6 +1746,7 @@ def create_html(
         gap: 18px;
         margin-bottom: 18px;
         max-width: 1100px;
+        min-width: 0;
     }
     
     .leaderboard {
