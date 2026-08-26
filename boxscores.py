@@ -182,6 +182,121 @@ def get_batting_leaderboards():
         "SB": make_leaderboard("SB")
     }
 
+def get_pitching_leaderboards():
+
+    leaderboards = {
+        "ERA": [],
+        "Strikeouts": [],
+        "Saves": []
+    }
+
+    with open(
+        "pitching-stats.csv",
+        "r",
+        newline="",
+        encoding="utf-8"
+    ) as csv_file:
+
+        reader = csv.DictReader(csv_file)
+
+        rows = list(reader)
+
+    # --------------------------------------------------------
+    # ERA — starters only
+    # --------------------------------------------------------
+
+    era_rows = []
+
+    for row in rows:
+
+        try:
+            gs = float(row["GS"])
+            era = float(row["ERA"])
+        except (ValueError, TypeError):
+            continue
+
+        if gs >= 1:
+            era_rows.append(
+                {
+                    "name": row["Name"],
+                    "team": row["Team"],
+                    "value": era,
+                    "display": row["ERA"]
+                }
+            )
+
+    era_rows.sort(
+        key=lambda player: player["value"]
+    )
+
+    leaderboards["ERA"] = era_rows[:10]
+
+    # --------------------------------------------------------
+    # Strikeouts
+    # --------------------------------------------------------
+
+    strikeout_rows = []
+
+    for row in rows:
+
+        try:
+            strikeouts = float(
+                row["Strikeouts"]
+            )
+        except (ValueError, TypeError):
+            continue
+
+        strikeout_rows.append(
+            {
+                "name": row["Name"],
+                "team": row["Team"],
+                "value": strikeouts,
+                "display": row["Strikeouts"]
+            }
+        )
+
+    strikeout_rows.sort(
+        key=lambda player: player["value"],
+        reverse=True
+    )
+
+    leaderboards["Strikeouts"] = (
+        strikeout_rows[:10]
+    )
+
+    # --------------------------------------------------------
+    # Saves
+    # --------------------------------------------------------
+
+    save_rows = []
+
+    for row in rows:
+
+        try:
+            saves = float(
+                row["Saves"]
+            )
+        except (ValueError, TypeError):
+            continue
+
+        save_rows.append(
+            {
+                "name": row["Name"],
+                "team": row["Team"],
+                "value": saves,
+                "display": row["Saves"]
+            }
+        )
+
+    save_rows.sort(
+        key=lambda player: player["value"],
+        reverse=True
+    )
+
+    leaderboards["Saves"] = save_rows[:10]
+
+    return leaderboards
+
 
 def get_batting_data(batting, player_positions):
     rows = batting.get_all_values()
@@ -1341,7 +1456,8 @@ def create_html(
     home_away_order,
     linescore_by_game,
     standings_rows,
-    batting_leaderboards
+    batting_leaderboards,
+    pitching_leaderboards
 ):
 
     html = """<!DOCTYPE html>
@@ -2026,6 +2142,7 @@ def main():
     )
     
     batting_leaderboards = get_batting_leaderboards()
+    pitching_leaderboards = get_pitching_leaderboards()
     
     batting_by_game = get_batting_data(
         batting,
@@ -2055,7 +2172,8 @@ def main():
         home_away_order,
         linescore_by_game,
         standings_rows,
-        batting_leaderboards
+        batting_leaderboards,
+        pitching_leaderboards
     )
 
     with open(
