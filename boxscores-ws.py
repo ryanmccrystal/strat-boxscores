@@ -1522,6 +1522,12 @@ h1 {
     line-height: 1.25;
 }
 
+.ws-game-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
 @media (max-width: 1500px) {
 
     .games-grid {
@@ -1620,24 +1626,36 @@ h1 {
     records = {}
 
     for game in games:
-
+    
         game_id = game["game_id"]
-
+    
         batting_rows = batting_by_game.get(
             game_id,
             []
         )
-
+    
         pitching_rows = pitching_by_game.get(
             game_id,
             []
         )
-
+    
         linescore_rows = linescore_by_game.get(
             game_id,
             []
         )
-
+    
+        # World Series game label
+        ws_number = game_id.replace(
+            "WS",
+            ""
+        )
+    
+        html += f"""
+        <div class="ws-game-title">
+            Game {html_escape(ws_number)}
+        </div>
+        """
+    
         html += make_game_section(
             game,
             batting_rows,
